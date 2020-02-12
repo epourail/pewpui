@@ -69,7 +69,7 @@ clean-all: ## Remove the docker images (docker services, network and volumes)
 # -----------------------------------------------------------------
 .PHONY: run-tests
 run-tests:
-	@$(DOCKER_COMPOSE) -f docker-compose.yaml -f docker-compose.test.yaml run api-tests run $(suite) $(coverage)
+	@$(DOCKER_COMPOSE) -f docker-compose.yaml -f docker-compose.test.yaml run tests run $(suite) $(coverage)
 
 .PHONY: run-tests-all
 run-tests-all: ## Run the tests (unit, api, acceptance)

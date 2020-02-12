@@ -8,6 +8,6 @@ services:
       - ./docker/php/conf.d/symfony.dev.ini/:/usr/local/etc/php/conf.d/symfony.ini
       - ./:/srv/api:rw,cached
 
-  api-nginx:
+  bo-nginx:
     volumes:
       - ./public:/srv/api/public:ro
