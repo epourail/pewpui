@@ -1,0 +1,21 @@
+# Codeception Test Suite Configuration
+#
+# Suite for api tests
+# Emulate web requests and make application process them
+# Include one of framework modules (Symfony2, Yii2, Laravel5) to use it
+# Remove this suite if you don't use frameworks
+
+actor: ApiTester
+modules:
+    enabled:
+        - Symfony:
+            app_path: 'src'
+            environment: 'test'
+        - REST:
+            url : /
+            depends: Symfony
+            part: Json
+#        - Doctrine2:
+#            depends: Symfony
+#            cleanup: true
+        - \App\Tests\Helper\Api

@@ -1,0 +1,19 @@
+# Codeception Test Suite Configuration
+#
+# Suite for acceptance tests.
+# Perform tests in browser using the WebDriver or PhpBrowser.
+# If you need both WebDriver and PHPBrowser tests - create a separate suite.
+
+actor: AcceptanceTester
+params:
+  - env
+modules:
+  enabled:
+    - PhpBrowser:
+        url: '%ACCEPTANCE_TEST_HOST%'
+        handler: guzzle
+    - REST:
+        url: /
+        depends: PhpBrowser
+        part: Json
+    - \App\Tests\Helper\Acceptance

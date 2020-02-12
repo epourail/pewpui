@@ -1,0 +1,28 @@
+# Tell Travis CI we are using PHP
+language: php
+# The platforms you wants to test on
+dist: bionic
+os:
+  - linux
+# Define the php versions against we want to test our code
+php:
+  - '7.3'
+# Install packages those will be required during build
+install:
+  - composer install --no-interaction
+# Run main commands
+script:
+  - vendor/bin/phpcs
+  - vendor/bin/phpstan analyse src --ansi
+  - vendor/bin/codecept run unit,api --coverage --coverage-xml
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f tests/_output/coverage.xml
+# Tell Travis CI to monitor only 'master' branch
+branches:
+  only: 
+    - master
+# Cache folder, you can delete cache from Travis CI web interface
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache

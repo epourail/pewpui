@@ -1,0 +1,28 @@
+name: Docker build (and Run the acceptance tests)
+
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches: 
+      - master
+      - feature/*
+      - fix/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Via the Makefile, build the Docker image
+        run: make build
+        
+      - name: Via the Makefile, run the acceptance tests
+        run: make run-tests-acceptance
+        
+      - name: Via the Makefile, stop the started contaiers
+        if: always()
+        run: make stop

@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+echo "## WAIT dependencies : waiting for db to be ready..."
+until bin/console sace:database:create; do
+    sleep 1
+done

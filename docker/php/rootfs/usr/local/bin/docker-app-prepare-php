@@ -1,0 +1,38 @@
+#!/bin/sh
+set -e
+
+PHP_INI_RECOMMENDED="$PHP_INI_DIR/php.ini-production"
+API_TEMPLATE_INI_RECOMMENDED="$PHP_INI_DIR/api-template.ini-production"
+if [ "$APP_ENV" != 'prod' ]; then
+    PHP_INI_RECOMMENDED="$PHP_INI_DIR/php.ini-development"
+    API_TEMPLATE_INI_RECOMMENDED="$PHP_INI_DIR/api-template.ini-development"
+fi
+
+echo "## PREPARE php : create symbolic link php.ini to $PHP_INI_RECOMMENDED"
+ln -sf "$PHP_INI_RECOMMENDED" "$PHP_INI_DIR/php.ini"
+
+echo "## PREPARE php : create symbolic link conf.d/api-template.ini to $API_TEMPLATE_INI_RECOMMENDED"
+ln -sf "$API_TEMPLATE_INI_RECOMMENDED" "$PHP_INI_DIR/conf.d/api-template.ini"
+
+echo "## PREPARE php : set ACLs (www-data)"
+mkdir -p var/cache var/log
+setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
+setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
+
+if [ "${APP_ENV}" = "dev" ] || [ "${APP_ENV}" = "test" ] ; then
+    echo "## PREPARE php : enable xdebug extension (${APP_ENV})"
+    docker-php-ext-enable xdebug
+
+    echo "## PREPARE php : run composer to load dev/test bundles (${APP_ENV})"
+    until composer install --no-interaction --no-progress --no-suggest --prefer-dist ; do
+        sleep 5
+    done
+fi
+
+if [ "${APP_ENV}" = "prod" ] ; then
+   echo "## PREPARE php : run composer dump-autoload (${APP_ENV})"
+   rm -f -r public/bundles/*
+   until composer dump-autoload --optimize --apcu --no-dev; do
+       sleep 5
+   done
+fi

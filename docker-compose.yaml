@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  api-php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: api_symfony_php
+    networks:
+      - front
+      - back
+
+  api-nginx:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: api_symfony_nginx
+    depends_on:
+      - api-php
+    ports: 
+      - 8881:80
+    networks:
+      - front
+      - back
+
+networks:
+  front:
+  back:

@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  api-tests:
+    image: codeception/codeception
+    depends_on:
+      - api-nginx
+    environment:
+      - ACCEPTANCE_TEST_HOST=http://api-nginx
+    volumes:
+      - .:/project:rw,cached
+    networks:
+      - front
+      - back
