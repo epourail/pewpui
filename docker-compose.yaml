@@ -5,16 +5,15 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-      target: api_symfony_php
+      target: api_pewpui_php
     networks:
-      - front
       - back
 
-  api-nginx:
+  bo-nginx:
     build:
       context: .
       dockerfile: ./Dockerfile
-      target: api_symfony_nginx
+      target: bo_pewpui_nginx
     depends_on:
       - api-php
     ports: 

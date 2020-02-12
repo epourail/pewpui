@@ -5,7 +5,7 @@ ARG NGINX_VERSION=1.17
 #
 # "php" stage
 #
-FROM php:${PHP_VERSION}-fpm-alpine AS api_symfony_php
+FROM php:${PHP_VERSION}-fpm-alpine AS api_pewpui_php
 
 # persistent / runtime deps
 RUN apk add --no-cache \
@@ -62,7 +62,7 @@ RUN chmod +x /usr/local/bin/*
 
 # Install PHP configurations (php.ini)
 RUN ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
-RUN ln -s $PHP_INI_DIR/api-template.ini-production $PHP_INI_DIR/conf.d/api-template.ini
+RUN ln -s $PHP_INI_DIR/api-pewpui.ini-production $PHP_INI_DIR/conf.d/api-pewpui.ini
 # Install PHP-FPM configuration (www.conf)
 COPY docker/php/rootfs/usr/local/etc/php/php-fpm.d/www.conf /usr/local/etc/php-fpm.d/www.conf
 
@@ -132,7 +132,7 @@ CMD ["serve"]
 #
 # "nginx" stage
 #
-FROM nginx:${NGINX_VERSION}-alpine AS api_symfony_nginx
+FROM nginx:${NGINX_VERSION}-alpine AS bo_pewpui_nginx
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
@@ -141,4 +141,4 @@ COPY docker/nginx/rootfs /
 
 WORKDIR /srv/api/public
 
-COPY --from=api_symfony_php /srv/api/public ./
+COPY --from=api_pewpui_php /srv/api/public ./

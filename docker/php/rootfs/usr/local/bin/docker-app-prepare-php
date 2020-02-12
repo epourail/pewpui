@@ -2,17 +2,17 @@
 set -e
 
 PHP_INI_RECOMMENDED="$PHP_INI_DIR/php.ini-production"
-API_TEMPLATE_INI_RECOMMENDED="$PHP_INI_DIR/api-template.ini-production"
+API_PEWPUI_INI_RECOMMENDED="$PHP_INI_DIR/api-pewpui.ini-production"
 if [ "$APP_ENV" != 'prod' ]; then
     PHP_INI_RECOMMENDED="$PHP_INI_DIR/php.ini-development"
-    API_TEMPLATE_INI_RECOMMENDED="$PHP_INI_DIR/api-template.ini-development"
+    API_PEWPUI_INI_RECOMMENDED="$PHP_INI_DIR/api-pewpui.ini-development"
 fi
 
 echo "## PREPARE php : create symbolic link php.ini to $PHP_INI_RECOMMENDED"
 ln -sf "$PHP_INI_RECOMMENDED" "$PHP_INI_DIR/php.ini"
 
-echo "## PREPARE php : create symbolic link conf.d/api-template.ini to $API_TEMPLATE_INI_RECOMMENDED"
-ln -sf "$API_TEMPLATE_INI_RECOMMENDED" "$PHP_INI_DIR/conf.d/api-template.ini"
+echo "## PREPARE php : create symbolic link conf.d/api-pewpui.ini to $API_PEWPUI_INI_RECOMMENDED"
+ln -sf "$API_PEWPUI_INI_RECOMMENDED" "$PHP_INI_DIR/conf.d/api-pewpui.ini"
 
 echo "## PREPARE php : set ACLs (www-data)"
 mkdir -p var/cache var/log

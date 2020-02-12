@@ -1,12 +1,12 @@
 version: '3.7'
 
 services:
-  api-tests:
+  tests:
     image: codeception/codeception
     depends_on:
-      - api-nginx
+      - bo-nginx
     environment:
-      - ACCEPTANCE_TEST_HOST=http://api-nginx
+      - ACCEPTANCE_TEST_HOST=http://bo-nginx
     volumes:
       - .:/project:rw,cached
     networks:
