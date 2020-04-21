@@ -27,3 +27,4 @@ helm/
 public/bundles/
 var/
 vendor/
+portainer/

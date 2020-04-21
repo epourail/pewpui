@@ -1,6 +1,6 @@
 include ./docker.env
-ifneq ("$(wildcard ./docker.env.local)","")
-include ./docker.env.local
+ifneq ("$(wildcard ./docker.local.env)","")
+include ./docker.local.env
 endif
 
 .PHONY: help

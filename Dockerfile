@@ -10,6 +10,7 @@ FROM php:${PHP_VERSION}-fpm-alpine AS api_pewpui_php
 # persistent / runtime deps
 RUN apk add --no-cache \
 		acl \
+		busybox-suid \
 		fcgi \
 		file \
 		gettext \
@@ -36,6 +37,9 @@ RUN set -eux; \
 	; \
 	pecl install \
 		apcu-${APCU_VERSION} \
+	; \
+	pecl install \
+		xdebug \
 	; \
 	pecl clear-cache; \
 	docker-php-ext-enable \

@@ -17,3 +17,7 @@
 /.phpcs-cache
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
+
+#/docker-compose.override.yaml
+#/docker.local.env
+/portainer

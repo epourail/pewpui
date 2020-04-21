@@ -343,6 +343,9 @@
     "symfony/polyfill-php73": {
         "version": "v1.13.1"
     },
+    "symfony/process": {
+        "version": "v5.0.4"
+    },
     "symfony/routing": {
         "version": "4.2",
         "recipe": {

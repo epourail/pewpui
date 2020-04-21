@@ -5,7 +5,7 @@ services:
     env_file:
       - .env.dev
     volumes:
-      - ./docker/php/conf.d/symfony.dev.ini/:/usr/local/etc/php/conf.d/symfony.ini
+      - ./docker/php/rootfs/usr/local/etc/php/api-pewpui.ini-development:/usr/local/etc/php/conf.d/api-pewpui.ini:ro
       - ./:/srv/api:rw,cached
 
   bo-nginx:
