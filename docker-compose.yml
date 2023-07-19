@@ -5,7 +5,36 @@ version: '3.8'
 # --------------------------------------------------------------------------------
 services:
 
-  # Cache
+  # Gateway (Kong)
+  # -----------------------------------------------------------------------------
+  kong:
+    container_name: gateway
+    image: kong:3.3
+    environment:
+      KONG_DATABASE: "off"
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:9080 http2
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_TRUSTED_IPS: '0.0.0.0/0,::/0'
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3      
+    ports:
+      - "8000:8000/tcp"
+      - "8001:8001/tcp"
+    volumes:
+      - ./configuration/kong:/etc/kong:ro
+    networks:
+      - back
+      - front
+
+  # Cache (Redis)
   # -----------------------------------------------------------------------------
   cache:
     container_name: cache
@@ -18,7 +47,7 @@ services:
     networks:
     - back
 
-  # Database
+  # Database (MariaDb)
   # -----------------------------------------------------------------------------
   database:
     container_name: database
@@ -38,8 +67,10 @@ services:
     networks:
     - back
 
+  # CMS (Directus)
+  # -----------------------------------------------------------------------------
   directus:
-    container_name: directus.local
+    container_name: directus
     image: directus/directus:10.4
     restart: unless-stopped
     depends_on:
@@ -48,21 +79,23 @@ services:
       cache:
         condition: service_healthy
       keycloak:
-        condition: service_healthy        
-#    volumes:
+        condition: service_healthy
+    volumes:
+    - ./configuration/directus/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
 #      - ./uploads:/directus/uploads
 #      - ./extensions:/directus/extensions
-    ports:
-      - "8055:${CMS_DIRECTUS_PORT}"
     environment:
-      KEY: 255d861b-5ea1-5996-9aa3-922530ec40b1
-      SECRET: 6116487b-cda1-52c2-b5b5-c8022c45e263
-
+      # General
       PUBLIC_URL: ${CMS_DIRECTUS_PUBLIC_URL}
+      LOG_LEVEL: info
+      # Admin Account
       ADMIN_EMAIL: ${CMS_DIRECTUS_ADMIN_USERNAME}
       ADMIN_PASSWORD: ${CMS_DIRECTUS_ADMIN_PASSWORD}
-      #CONTENT_SECURITY_POLICY_DIRECTIVES__IMG_SRC: '*'
-      LOG_LEVEL: info
+      # Proxy
+      ROOT_REDIRECT: "/cms/admin"
+      # Security
+      KEY: 255d861b-5ea1-5996-9aa3-922530ec40b1
+      SECRET: 6116487b-cda1-52c2-b5b5-c8022c45e263
       # Database
       DB_CLIENT: mysql
       DB_HOST: ${DB_HOST}
@@ -72,10 +105,10 @@ services:
       DB_PASSWORD: ${DB_DIRECTUS_PASSWORD}
       # Cache
       CACHE_ENABLED: 'true'
+      CACHE_AUTO_PURGE: 'true'
       CACHE_STORE: redis
       REDIS: redis://${CACHE_HOST}:${CACHE_PORT}/4
-      CACHE_AUTO_PURGE: 'true'
-      # OAuth
+      # Authentication
       AUTH_PROVIDERS: keycloak
       AUTH_KEYCLOAK_DRIVER: openid
       AUTH_KEYCLOAK_CLIENT_ID: ${IDP_KEYCLOAK_CLIENT_ID}
@@ -85,31 +118,41 @@ services:
       AUTH_KEYCLOAK_IDENTIFIER_KEY: email
       AUTH_KEYCLOAK_ALLOW_PUBLIC_REGISTRATION: 'true'
       AUTH_KEYCLOAK_SCOPE: ${IDP_KEYCLOAK_SCOPE}
-      AUTH_KEYCLOAK_DEFAULT_ROLE_ID: ${IDP_KEYCLOAK_DEFAULT_ROLE_ID}
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', 'directus', '8055']
+      interval: 15s
+      timeout: 5s
+      retries: 3
     networks:
     - front
     - back
 
-  # Keycloak
+  # IDP (Keycloak)
   # -----------------------------------------------------------------------------
   keycloak:
-    container_name: keycloak.local
-    image: quay.io/keycloak/keycloak:21.1
-    volumes:
-    - ./configuration/keycloak/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:22.0
     depends_on:
       database:
         condition: service_healthy
-    ports:
-    - 8056:${IDP_KEYCLOAK_PORT}
-    command: "start --http-enabled=true --hostname-strict=false"
+    command: "start --http-enabled=true --import-realm"
+    volumes:
+    - ./configuration/keycloak/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
+    - ./configuration/keycloak/realm:/opt/keycloak/data/import
     environment:
+      # Admin Account
       KEYCLOAK_ADMIN: ${IDP_KEYCLOAK_ADMIN_USERNAME}
       KEYCLOAK_ADMIN_PASSWORD: ${IDP_KEYCLOAK_ADMIN_PASSWORD}
-      # Keycloak
+      # Logging
       KC_LOG_LEVEL: info
-      KC_HTTP_PORT: ${IDP_KEYCLOAK_PORT}
+      # Health
       KC_HEALTH_ENABLED: 'true'
+      # Proxy
+      KC_PROXY: edge
+      PROXY_ADDRESS_FORWARDING: 'true'
+      # Hostname
+      KC_HOSTNAME_ADMIN_URL: http://pewpui.mvp.local:8000/auth/
+      KC_HOSTNAME_URL: http://pewpui.mvp.local:8000/auth
       # Database
       KC_DB: mariadb
       KC_DB_URL_HOST: ${DB_HOST}
@@ -118,10 +161,10 @@ services:
       KC_DB_USERNAME: ${DB_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
     healthcheck:
-      test: "healthcheck.sh ${IDP_KEYCLOAK_HOST} ${IDP_KEYCLOAK_PORT}"
-      interval: 5s
+      test: ['CMD', 'healthcheck.sh', 'keycloak', '8080']
+      interval: 15s
       timeout: 5s
-      retries: 10
+      retries: 3
     networks:
     - front
     - back
@@ -130,15 +173,13 @@ services:
   # -----------------------------------------------------------------------------
   adminer:
     container_name: adminer
-    image: adminer:4.7
+    image: adminer:4.8.1
     environment:
       ADMINER_DESIGN: mvt
       ADMINER_DEFAULT_SERVER: ${DB_HOST}
     depends_on:
       database:
         condition: service_healthy
-    ports: 
-    - 8099:8080
     networks:
     - back
     - front

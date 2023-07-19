@@ -1,4 +1,5 @@
 #!/bin/bash
+
 HTTP_HOST=$1
 HTTP_PORT=$2
 

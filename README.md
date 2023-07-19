@@ -1,20 +1,38 @@
-# pewpui
+# PEWPUI
 
-## Configure Directus to use Keycloak as Authentication Provider
+## Introduction
 
-Run, locally using docker-compose, Directus using Keycloak as an IDP.
+Setup and run locally using docker-compose, the PEWPUI configuration using the Directus CMS-headless and Keycloak as an IDP.
 
 ### Services
 
-* Keycloak (`keycloak`, `keycloak`): <http://keycloak.local:8056/auth/>
-* Directus (`admin@example.com`, `d1r3ctu5`): <http://directus.local:8055/admin/#/login>
+Once launched and configured, the available services are:
 
-### Local setup
+* Keycloak to manage the users of the directus service
+  * admin UI (`keycloak`, `keycloak`): http://pewpui.mvp.local/auth
+  * http://pewpui.mvp.local:8000/auth/realms/pewpui/.well-known/openid-configuration
+
+* Directus to manage the pewpui data:
+  * admin UI (`admin@example.com`, `d1r3ctu5`): http://pewpui.mvp.local:8000/cms
+  * keycloak user (`guest` or `guest@example.com`, `guest`)
+
+* Adminer to query the database:  
+  * admin UI: http://pewpui.mvp.local:8000/adminer
+
+* Mariadb to manage the database
+
+* Redis to manage the cached data
+
+* Kong to manage the reverse proxy between services
+  
+## Getting Started
+
+### 1. Build process
 
 In /etc/hosts, add
 
 ```bash
-127.0.0.1 keycloak.local directus.local
+127.0.0.1 pewpui.mvp.local
 ```
 
 Run:
@@ -23,39 +41,33 @@ Run:
 docker-compose up -d --build
 ```
 
-### Config
+### 2. Setup directus
 
-Config Directus:
-
+* One directus is healthy, connect using the default admin account
 * Create new Role `Guest` via the `Settings>Roles&Permissions` menus
   * get the item ID of the role (via the url),
-  * paste the value in the `docker-compose.yml` file as en environnment variable of the directus service
+  * paste the value in a `docker-compose.override.yml` file as an environnment variable of the directus service
   
   ```yaml
-  directus:
-    environment:
-      AUTH_KEYCLOAK_DEFAULT_ROLE_ID: <roleID>
+  version: '3.8'
+
+  services:
+    directus:
+      environment:
+        AUTH_KEYCLOAK_DEFAULT_ROLE_ID: <roleID>
   ```
 
-Config Keycloak:
-
-1. Create the `pewpui` realm
-   * import the `configuration/keycloak/realm-pewpui.json` file
-2. Create the `directus-ui` client
-   * importing the `configuration/keycloak/client-durectus-ui.json` file
-3. Add a user in the `pewpui` realm
-   * setup the user credentials (OTP, temporary password, ...)
-4. Restart docker-compose
+### 4. Restart docker-compose
 
   ```bash
-  docker-compose stop
   docker-compose up -d
   ```
 
-note:
-* http://keycloak.local:8056/auth/realms/pewpui/.well-known/openid-configuration
+### 5. Test the Keycloak connection
 
-## Cleanup the project
+Connect with the default `guest` Keycloak user on your Directus.
+
+## HOWTO cleanup the project
 
 The following steps will delete all the containers/networks/volumes defined in the docker-compose project
 
@@ -65,7 +77,7 @@ The following steps will delete all the containers/networks/volumes defined in t
   docker-compose stop
   ```
 
-2. remove all the services (containers/netowrks/volumes)
+2. remove all the services (containers/networks/volumes)
 
   ```bash
   docker-compose rm -fsv 
