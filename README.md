@@ -9,15 +9,16 @@ Setup and run locally using docker-compose, the PEWPUI configuration using the D
 Once launched and configured, the available services are:
 
 * Keycloak to manage the users of the directus service
-  * admin UI (`keycloak`, `keycloak`): http://pewpui.mvp.local/auth
-  * http://pewpui.mvp.local:8000/auth/realms/pewpui/.well-known/openid-configuration
+  * admin UI (`keycloak`, `keycloak`): https://pewpui.mvp.local:8443/auth
+  * https://pewpui.mvp.local:8443/auth/realms/pewpui/.well-known/openid-configuration
 
 * Directus to manage the pewpui data:
-  * admin UI (`admin@example.com`, `d1r3ctu5`): http://pewpui.mvp.local:8000/cms
+  * admin UI (`directus@example.com`, `directus`): https://pewpui.mvp.local:8443/cms
   * keycloak user (`guest` or `guest@example.com`, `guest`)
+  * keycloak admin user (`admin` or `admin@example.com`, `admin`)
 
 * Adminer to query the database:  
-  * admin UI: http://pewpui.mvp.local:8000/adminer
+  * admin UI: https://pewpui.mvp.local:8443/adminer
 
 * Mariadb to manage the database
 
@@ -27,7 +28,7 @@ Once launched and configured, the available services are:
   
 ## Getting Started
 
-### 1. Build process
+### Build process
 
 In /etc/hosts, add
 
@@ -41,33 +42,66 @@ Run:
 docker-compose up -d --build
 ```
 
-### 2. Setup directus
+### Test the Directus connection
 
-* One directus is healthy, connect using the default admin account
-* Create new Role `Guest` via the `Settings>Roles&Permissions` menus
-  * get the item ID of the role (via the url),
-  * paste the value in a `docker-compose.override.yml` file as an environnment variable of the directus service
-  
-  ```yaml
-  version: '3.8'
+Connect with the admin `directus@example.com` account on your Directus.
 
-  services:
-    directus:
-      environment:
-        AUTH_KEYCLOAK_DEFAULT_ROLE_ID: <roleID>
-  ```
+### Test the Keycloak connection
 
-### 4. Restart docker-compose
-
-  ```bash
-  docker-compose up -d
-  ```
-
-### 5. Test the Keycloak connection
-
+Disconnect if you were already connected, and click on the `Connect with Keycloak` button.
 Connect with the default `guest` Keycloak user on your Directus.
 
-## HOWTO cleanup the project
+## Help
+
+### HOWTO setup HTTPS certificate
+
+The `./configuration/kong/certs` folder contains the certificate used by Kong.
+
+_Note 1_: The certificate expiration date is really short so you might have to update the certificate with the following note.
+_Note 2_: You can create your own certificate with the following command line from the certifs folder (delete the old ones):
+
+```sh
+openssl req -x509 -out ./configuration/kong/certs/kong.crt -keyout ./configuration/kong/certs/kong.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=pewpui.mvp.local' -extensions EXT -config <( \
+   printf "[dn]\nCN=pewpui.mvp.local\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:pewpui.mvp.local\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+```
+
+### HOWTO export the realm confguration
+
+The `./configuration/keycloak/realm/realm-pewpui.json` contains the Keycloak configuration used to setup the pewpui realm.
+
+The following steps will export the pewpui realm in order to archive the configuration (under the git source control)
+
+1. setup the Keycloak confuration via the admin user interface
+2. create a `docker-compose.override.yml` file as follow to export the pewpui realm
+
+```yaml
+version: '3.8'
+
+services:
+  keycloak:
+    command: "export --file /opt/keycloak/data/tmp/realm-pewpui.json --realm pewpui --users realm_file"
+    volumes:
+    - ./configuration/keycloak/realm/realm-pewpui.json:/opt/keycloak/data/tmp/realm-pewpui.json:rw
+```
+
+3. restart the docker-compose project
+
+```bash
+docker-compose up -d 
+```
+
+_note_: the directus and kong services will failed 
+
+4. rollback the changes of the `docker-compose.override.yml` file
+5. restart the docker-compose project
+
+```bash
+docker-compose up -d 
+```
+
+### HOWTO cleanup the docker-compose project
 
 The following steps will delete all the containers/networks/volumes defined in the docker-compose project
 
@@ -85,4 +119,4 @@ The following steps will delete all the containers/networks/volumes defined in t
   docker volume rm XXX
   ```
 
-  Where XXX is the name of the volume to delete
+  Where `XXX`` is the name of the volume to delete
