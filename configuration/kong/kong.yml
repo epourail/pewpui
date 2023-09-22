@@ -27,7 +27,18 @@ services:
   - name: adminer-route
     paths:
     - '/adminer'
-    strip_path: false
+    strip_path: true
+    preserve_host: true
+    hosts:
+    - 'pewpui.mvp.local'
+
+- name: api-places-service
+  url: http://places-api:80
+  routes:
+  - name: api-places-route
+    paths:
+    - '/api'
+    strip_path: true
     preserve_host: true
     hosts:
     - 'pewpui.mvp.local'

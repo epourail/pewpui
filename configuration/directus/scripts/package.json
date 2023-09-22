@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@directus/sdk": "^11.0.0",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.0"
+  },
+  "scripts": {
+    "add-places-flows": "npx ts-node ./directus-places-flows.ts",
+    "add-places-collection": "npx ts-node ./directus-places-collection.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/uuid": "^9.0.2"
+  }
+}

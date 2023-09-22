@@ -11,7 +11,7 @@ services:
     container_name: gateway
     image: kong:3.3
     environment:
-      KONG_LOG_LEVEL: debug
+      KONG_LOG_LEVEL: info
       KONG_DATABASE: "off"
       KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
@@ -61,7 +61,7 @@ services:
     volumes:
     - ./configuration/database/my.cnf:/etc/mysql/mariadb.conf.d/my.cnf:ro
     - ./configuration/database/schema.sql:/docker-entrypoint-initdb.d/1.sql
-    - db_data:/var/lib/mysql
+    - mariadb_data:/var/lib/mysql
     environment:
       MARIADB_ROOT_PASSWORD: s€cr€t
     healthcheck:
@@ -71,6 +71,28 @@ services:
       retries: 5
     networks:
     - back
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:6.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: mongo
+      MONGO_PLACES_DATABASE: ${DB_PLACES_DATABASE}
+      MONGO_PLACES_USERNAME: ${DB_PLACES_USERNAME}
+      MONGO_PLACES_PASSWORD: ${DB_PLACES_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', 'mongodb', '27017']
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./configuration/mongodb/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
+#      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+      - mongodb_data:/data/db
+    networks:
+      - back
 
   # CMS (Directus)
   # -----------------------------------------------------------------------------
@@ -92,7 +114,7 @@ services:
     environment:
       # General
       PUBLIC_URL: ${CMS_DIRECTUS_PUBLIC_URL}
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
       # Default role
       CMS_DIRECTUS_DEFAULT_ROLE_ID: ${CMS_DIRECTUS_DEFAULT_ROLE_ID}
       CMS_DIRECTUS_DEFAULT_ROLE_NAME: ${CMS_DIRECTUS_DEFAULT_ROLE_NAME}
@@ -104,8 +126,8 @@ services:
       ADMIN_PASSWORD: ${CMS_DIRECTUS_ADMIN_PASSWORD}
       # Database
       DB_CLIENT: mysql
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_INTERNAL_HOST}
+      DB_PORT: ${DB_INTERNAL_PORT}
       DB_DATABASE: ${DB_DIRECTUS_DATABASE}
       DB_USER: ${DB_DIRECTUS_USERNAME}
       DB_PASSWORD: ${DB_DIRECTUS_PASSWORD}
@@ -113,7 +135,7 @@ services:
       CACHE_ENABLED: 'true'
       CACHE_AUTO_PURGE: 'true'
       CACHE_STORE: redis
-      REDIS: redis://${CACHE_HOST}:${CACHE_PORT}/4
+      REDIS: redis://${CACHE_INTERNAL_HOST}:${CACHE_INTERNAL_PORT}/4
       # Authentication
       AUTH_DISABLE_DEFAULT: 'false'
       AUTH_PROVIDERS: keycloak
@@ -128,13 +150,13 @@ services:
       # Proxy
       ROOT_REDIRECT: "/cms/admin"
     healthcheck:
-      test: ['CMD', 'healthcheck.sh', 'directus', '8055']
+      test: ['CMD', 'healthcheck.sh', '${CMS_DIRECTUS_INTERNAL_HOST}', '${CMS_DIRECTUS_INTERNAL_PORT}']
       interval: 15s
       timeout: 5s
       retries: 3
     networks:
-    - front
-    - back
+      - front
+      - back
 
   # IDP (Keycloak)
   # -----------------------------------------------------------------------------
@@ -153,7 +175,7 @@ services:
       KEYCLOAK_ADMIN: ${IDP_KEYCLOAK_ADMIN_USERNAME}
       KEYCLOAK_ADMIN_PASSWORD: ${IDP_KEYCLOAK_ADMIN_PASSWORD}
       # Logging
-      KC_LOG_LEVEL: debug
+      KC_LOG_LEVEL: info
       # Health
       KC_HEALTH_ENABLED: 'true'
       # Proxy
@@ -164,34 +186,78 @@ services:
       KC_HOSTNAME_URL: ${IDP_KEYCLOAK_HOSTNAME_URL}
       # Database
       KC_DB: mariadb
-      KC_DB_URL_HOST: ${DB_HOST}
-      KC_DB_URL_PORT: ${DB_PORT}
+      KC_DB_URL_HOST: ${DB_INTERNAL_HOST}
+      KC_DB_URL_PORT: ${DB_INTERNAL_PORT}
       KC_DB_URL_DATABASE: ${DB_KEYCLOAK_DATABASE}
       KC_DB_USERNAME: ${DB_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
     healthcheck:
-      test: ['CMD', 'healthcheck.sh', 'keycloak', '8080']
+      test: ['CMD', 'healthcheck.sh', '${KEYCLOAK_INTERNAL_HOST}', '${KEYCLOAK_INTERNAL_PORT}']
       interval: 20s
       timeout: 5s
       retries: 10
     networks:
-    - front
-    - back
+      - front
+      - back
 
-  # Tools: adminer
+  # Domain: places (init directus data model)
   # -----------------------------------------------------------------------------
-  adminer:
-    container_name: adminer
-    image: adminer:4.8.1
+  directus-init-places:
+    container_name: directus-init-places
+    build:
+      context: ./configuration/directus/scripts
+      dockerfile: ./Dockerfile
     environment:
-      ADMINER_DESIGN: mvt
-      ADMINER_DEFAULT_SERVER: ${DB_HOST}
+      CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
+      CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
+      CMS_DIRECTUS_PLACES_COLLECTION: 'places'
+    command: 'add-places-collection'
     depends_on:
-      database:
+      directus:
         condition: service_healthy
     networks:
-    - back
-    - front
+      - back
+
+  # Domain: places (init directus data model)
+  # -----------------------------------------------------------------------------
+  directus-init-flows:
+    container_name: directus-init-flows
+    build:
+      context: ./configuration/directus/scripts
+      dockerfile: ./Dockerfile
+    environment:
+      CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
+      CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
+      CMS_DIRECTUS_PLACES_COLLECTION: 'places'
+      API_WEBHOOK_URL: 'http://${API_PLACES_INTERNAL_HOST}:${API_PLACES_INTERNAL_PORT}/webhook/places'
+    command: 'add-places-flows'
+    depends_on:
+      directus-init-places:
+        condition: service_completed_successfully
+    networks:
+      - back
+
+  # Domain: places (init directus data model)
+  # -----------------------------------------------------------------------------
+  places-api:
+    container_name: places-api
+    build: 
+      context: ./api
+      dockerfile: POC.FNow.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DirectusOptions__Url: http://${KONG_INTERNAL_HOST}:${KONG_INTERNAL_PORT}/cms
+      DirectusOptions__ExtraHeaders__Host: ${PUBLIC_HOST}
+      DirectusOptions__PermToken: 'XXXXX'
+      MongoDbOptions__ConnectionString: 'mongodb://root:secret@mongodb:27017'
+    depends_on:
+      directus-init-flows:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+    networks:
+      - front
+      - back
 
 # --------------------------------------------------------------------------------
 # Networks
@@ -204,4 +270,5 @@ networks:
 # Volumes
 # --------------------------------------------------------------------------------
 volumes:
-  db_data:
+  mariadb_data:
+  mongodb_data:
