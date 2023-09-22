@@ -74,12 +74,17 @@ class Main {
 			"delete"
 		];
 		
-		let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
-		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
 		let cmsUrl = process.env.CMS_DIRECTUS_URL;
 		console.log(`CMS DIRECTUS PUBLIC URL: ${cmsUrl}`);
 		let permToken = process.env.CMS_DIRECTUS_PERMTOKEN;
 		console.log(`CMS DIRECTUS USER STATIC TOKEN: ${permToken?.substring(0,2)}...${permToken?.slice(-2)}`);
+		let adminEmail = process.env.CMS_DIRECTUS_ADMIN_EMAIL;
+		console.log(`CMS DIRECTUS ADMIN EMAIL: ${adminEmail}`);
+		let adminPwd = process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
+		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${adminPwd?.substring(0,2)}...${adminPwd?.slice(-2)}`);
+
+		let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
+		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
 		let webhookUrl = process.env.API_WEBHOOK_URL ?? '';
 		console.log(`API WEBHOOK URL: ${webhookUrl}`);
 

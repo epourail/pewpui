@@ -1,4 +1,4 @@
-import { createDirectus, staticToken, rest, createCollection, DirectusCollection, createField, NestedPartial, DirectusField, readCollections } from '@directus/sdk';
+import { createDirectus, staticToken, rest, createCollection, DirectusCollection, NestedPartial, readCollection } from '@directus/sdk';
 import dotenv from "dotenv";
 
 type CollectionWithFields = {
@@ -11,28 +11,28 @@ dotenv.config();
 
 class Main {
 	static async main() {
-        let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
-		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
 		let cmsUrl = process.env.CMS_DIRECTUS_URL;
 		console.log(`CMS DIRECTUS PUBLIC URL: ${cmsUrl}`);
+		// let adminEmail = process.env.CMS_DIRECTUS_ADMIN_EMAIL;
+        // console.log(`CMS DIRECTUS ADMIN EMAIL: ${adminEmail}`);
+        // let adminPwd = process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
+		// console.log(`CMS DIRECTUS ADMIN PASSWORD: ${adminPwd?.substring(0,2)}...${adminPwd?.slice(-2)}`);
 		let permToken = process.env.CMS_DIRECTUS_PERMTOKEN;
 		console.log(`CMS DIRECTUS USER STATIC TOKEN: ${permToken?.substring(0,2)}...${permToken?.slice(-2)}`);
 
-		try{
+
+        let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
+		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
+        try{
 			const client = createDirectus<any>(cmsUrl as string)
                 .with(staticToken(process.env.CMS_DIRECTUS_PERMTOKEN as string))
                 .with(rest());
 
-            let collections = await client.request(readCollections());
-
-            let foundCollection = collections.find(collection => {
-                return collection.collection == placesCollection;
-            });
-
+            let foundCollection = await client.request(readCollection(placesCollection as string));
             if(foundCollection != null) {
                 console.log(`[INFORMATION] collection found: ${foundCollection.collection}`);
 
-            } else  {
+            } else {
                 const directusCollection: ExtendedCollection = {
                     collection: placesCollection,
                     schema: {
@@ -154,10 +154,10 @@ class Main {
                 console.log(createCollectionResp);
             }
 
-		} catch($error){
+		} catch($error) {
 			console.log($error);
 			throw $error;
-		}
+        }
 	}
 }
 

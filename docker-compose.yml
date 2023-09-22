@@ -7,6 +7,15 @@ services:
 
   # Gateway (Kong)
   # -----------------------------------------------------------------------------
+  kong-init:
+    container_name: kong-init
+    image: busybox:1.36
+    command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/kong/kong.tpl > /tmp/kong/kong.docker.yml"
+    volumes:
+      - ./configuration/kong:/tmp/kong:rw
+    networks:
+      - back
+
   kong:
     container_name: gateway
     image: kong:3.3
@@ -33,7 +42,7 @@ services:
       - "8443:8443"
       - "8444:8444"
     volumes:
-      - ./configuration/kong:/etc/kong:ro
+      - ./configuration/kong/kong.docker.yml:/etc/kong/kong.yml:ro
       - ./configuration/kong/certs:/ssl:ro
     networks:
       - back
@@ -89,7 +98,7 @@ services:
       retries: 10
     volumes:
       - ./configuration/mongodb/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
-#      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
       - mongodb_data:/data/db
     networks:
       - back
@@ -200,44 +209,28 @@ services:
       - front
       - back
 
-  # Domain: places (init directus data model)
+  # Places Domain: init
   # -----------------------------------------------------------------------------
-  directus-init-places:
-    container_name: directus-init-places
+  directus-init:
+    container_name: directus-init
     build:
       context: ./configuration/directus/scripts
       dockerfile: ./Dockerfile
     environment:
       CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
       CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
+      CMS_DIRECTUS_ADMIN_EMAIL: '${CMS_DIRECTUS_ADMIN_EMAIL}'
+      CMS_DIRECTUS_ADMIN_PASSWORD: '${CMS_DIRECTUS_ADMIN_PASSWORD}'
       CMS_DIRECTUS_PLACES_COLLECTION: 'places'
-    command: 'add-places-collection'
+      API_WEBHOOK_URL: 'http://${API_PLACES_INTERNAL_HOST}:${API_PLACES_INTERNAL_PORT}/webhook/places'
+    command: 'add-places-collection && add-places-flows'
     depends_on:
       directus:
         condition: service_healthy
     networks:
       - back
 
-  # Domain: places (init directus data model)
-  # -----------------------------------------------------------------------------
-  directus-init-flows:
-    container_name: directus-init-flows
-    build:
-      context: ./configuration/directus/scripts
-      dockerfile: ./Dockerfile
-    environment:
-      CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
-      CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
-      CMS_DIRECTUS_PLACES_COLLECTION: 'places'
-      API_WEBHOOK_URL: 'http://${API_PLACES_INTERNAL_HOST}:${API_PLACES_INTERNAL_PORT}/webhook/places'
-    command: 'add-places-flows'
-    depends_on:
-      directus-init-places:
-        condition: service_completed_successfully
-    networks:
-      - back
-
-  # Domain: places (init directus data model)
+  # Places domain: Api
   # -----------------------------------------------------------------------------
   places-api:
     container_name: places-api
@@ -251,7 +244,7 @@ services:
       DirectusOptions__PermToken: 'XXXXX'
       MongoDbOptions__ConnectionString: 'mongodb://root:secret@mongodb:27017'
     depends_on:
-      directus-init-flows:
+      directus-init:
         condition: service_completed_successfully
       mongodb:
         condition: service_healthy
