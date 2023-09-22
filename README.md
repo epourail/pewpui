@@ -9,16 +9,16 @@ Setup and run locally using docker-compose, the PEWPUI configuration using the D
 Once launched and configured, the available services are:
 
 * Keycloak to manage the users of the directus service
-  * admin UI (`keycloak`, `keycloak`): https://pewpui.mvp.local:8443/auth
-  * https://pewpui.mvp.local:8443/auth/realms/pewpui/.well-known/openid-configuration
+  * admin UI (`keycloak`, `keycloak`): https://pewpiu-test3.northeurope.cloudapp.azure.com:8443/auth
+  * https://pewpiu-test3.northeurope.cloudapp.azure.com:8443/auth/realms/pewpui/.well-known/openid-configuration
 
 * Directus to manage the pewpui data:
-  * admin UI (`directus@example.com`, `directus`): https://pewpui.mvp.local:8443/cms
+  * admin UI (`directus@example.com`, `directus`): https://pewpiu-test3.northeurope.cloudapp.azure.com:8443/cms
   * keycloak user (`guest` or `guest@example.com`, `guest`)
   * keycloak admin user (`admin` or `admin@example.com`, `admin`)
 
 * Adminer to query the database:  
-  * admin UI: https://pewpui.mvp.local:8443/adminer
+  * admin UI: https://pewpiu-test3.northeurope.cloudapp.azure.com:8443/adminer
 
 * Mariadb to manage the database
 
@@ -33,7 +33,7 @@ Once launched and configured, the available services are:
 In /etc/hosts, add
 
 ```bash
-127.0.0.1 pewpui.mvp.local
+127.0.0.1 pewpiu-test3.northeurope.cloudapp.azure.com
 ```
 
 Run:
@@ -63,8 +63,8 @@ _Note 2_: You can create your own certificate with the following command line fr
 ```sh
 openssl req -x509 -out ./configuration/kong/certs/kong.crt -keyout ./configuration/kong/certs/kong.key \
   -newkey rsa:2048 -nodes -sha256 \
-  -subj '/CN=pewpui.mvp.local' -extensions EXT -config <( \
-   printf "[dn]\nCN=pewpui.mvp.local\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:pewpui.mvp.local\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+  -subj '/CN=pewpiu-test3.northeurope.cloudapp.azure.com' -extensions EXT -config <( \
+   printf "[dn]\nCN=pewpiu-test3.northeurope.cloudapp.azure.com\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:pewpiu-test3.northeurope.cloudapp.azure.com\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 ```
 
 ### HOWTO export the realm confguration
