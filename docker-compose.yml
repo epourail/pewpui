@@ -77,8 +77,8 @@ services:
     image: mongo:6.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: secret
-      MONGO_INITDB_DATABASE: mongo
+      MONGO_INITDB_ROOT_PASSWORD: s€cr€t
+      MONGO_INITDB_DATABASE: admin
       MONGO_PLACES_DATABASE: ${DB_PLACES_DATABASE}
       MONGO_PLACES_USERNAME: ${DB_PLACES_USERNAME}
       MONGO_PLACES_PASSWORD: ${DB_PLACES_PASSWORD}
@@ -89,7 +89,7 @@ services:
       retries: 10
     volumes:
       - ./configuration/mongodb/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
-#      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
       - mongodb_data:/data/db
     networks:
       - back
@@ -246,10 +246,10 @@ services:
       dockerfile: POC.FNow.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      DirectusOptions__Url: http://${KONG_INTERNAL_HOST}:${KONG_INTERNAL_PORT}/cms
+      DirectusOptions__Url: ${CMS_DIRECTUS_PUBLIC_URL}
       DirectusOptions__ExtraHeaders__Host: ${PUBLIC_HOST}
       DirectusOptions__PermToken: 'XXXXX'
-      MongoDbOptions__ConnectionString: 'mongodb://root:secret@mongodb:27017'
+      MongoDbOptions__ConnectionString: mongodb://${DB_PLACES_USERNAME}:${DB_PLACES_PASSWORD}@mongodb:27017
     depends_on:
       directus-init-flows:
         condition: service_completed_successfully
@@ -257,7 +257,6 @@ services:
         condition: service_healthy
     networks:
       - front
-      - back
 
 # --------------------------------------------------------------------------------
 # Networks
