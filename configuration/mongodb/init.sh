@@ -8,7 +8,7 @@ use $MONGO_PLACES_DATABASE;
 db.createUser({
   user: $MONGO_PLACES_USERNAME,
   pwd: $MONGO_PLACES_PASSWORD,
-  roles: [{ role: "readWrite", db: "$MONGO_PLACES_DATABASE" }],
+  roles: [{ role: "readWrite" }],
 });
 print("End adding the '$MONGO_PLACES_USERNAME' user.");
 
