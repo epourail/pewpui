@@ -8,7 +8,7 @@ services:
   # Gateway (Kong)
   # -----------------------------------------------------------------------------
   kong-pre-init:
-    container_name: gateway-pre-init
+    container_name: ${COMPOSE_PROJECT_NAME}_gateway-pre-init
     image: busybox:1.36
     command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/kong/kong.tpl.yml > /tmp/kong/kong.docker.yml"
     volumes:
@@ -17,7 +17,7 @@ services:
       - back
 
   kong:
-    container_name: gateway
+    container_name: ${COMPOSE_PROJECT_NAME}_gateway
     image: kong:3.3
     depends_on:
       kong-pre-init:
@@ -54,7 +54,7 @@ services:
   # Cache (Redis)
   # -----------------------------------------------------------------------------
   cache:
-    container_name: cache
+    container_name: ${COMPOSE_PROJECT_NAME}_cache
     image: redis:7.0-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -67,7 +67,7 @@ services:
   # Database (MariaDb)
   # -----------------------------------------------------------------------------
   database:
-    container_name: database
+    container_name: ${COMPOSE_PROJECT_NAME}_mariadb
     image: mariadb:11.0.2
     restart: always
     volumes:
@@ -85,7 +85,7 @@ services:
     - back
 
   mongodb:
-    container_name: mongodb
+    container_name: ${COMPOSE_PROJECT_NAME}_mongodb
     image: mongo:6.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -109,7 +109,7 @@ services:
   # CMS (Directus)
   # -----------------------------------------------------------------------------
   directus:
-    container_name: directus
+    container_name: ${COMPOSE_PROJECT_NAME}_directus
     image: directus/directus:10.5
     restart: unless-stopped
     depends_on:
@@ -125,7 +125,7 @@ services:
     - ./configuration/directus/extensions/migrations:/directus/extensions/migrations
     environment:
       # General
-      PUBLIC_URL: https://${pewpui.mvp.local}:8443/cms
+      PUBLIC_URL: https://${PUBLIC_HOST}:8443/cms
       LOG_LEVEL: info
       # Default role
       CMS_DIRECTUS_DEFAULT_ROLE_ID: ${CMS_DIRECTUS_DEFAULT_ROLE_ID}
@@ -173,7 +173,7 @@ services:
   # IDP (Keycloak)
   # -----------------------------------------------------------------------------
   keycloak-pre-init:
-    container_name: keycloak-pre-init
+    container_name: ${COMPOSE_PROJECT_NAME}_keycloak-pre-init
     image: busybox:1.36
     command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/keycloak/realm/realm-pewpui.tpl.json > /tmp/keycloak/realm/realm-pewpui.docker.json"
     volumes:
@@ -182,7 +182,7 @@ services:
       - back
   
   keycloak:
-    container_name: keycloak
+    container_name: ${COMPOSE_PROJECT_NAME}_keycloak
     image: quay.io/keycloak/keycloak:22.0
     depends_on:
       database:
@@ -224,7 +224,7 @@ services:
   # Places Domain: init
   # -----------------------------------------------------------------------------
   directus-post-init:
-    container_name: directus-post-init
+    container_name: ${COMPOSE_PROJECT_NAME}_directus-post-init
     build:
       context: ./configuration/directus/scripts
       dockerfile: ./Dockerfile
@@ -249,7 +249,7 @@ services:
   # Places domain: Api
   # -----------------------------------------------------------------------------
   places-api:
-    container_name: places-api
+    container_name: ${COMPOSE_PROJECT_NAME}_places-api
     build: 
       context: ./api
       dockerfile: POC.FNow.Api/Dockerfile
