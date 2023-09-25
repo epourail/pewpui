@@ -46,6 +46,32 @@ Run:
 docker-compose up -d --build
 ```
 
+_note_: At this step, the first time, the startup will fail has the Directus PERMTOKEN is not set correctly.
+
+Follow this steps to end the setup:
+
+1. connect to Directus and generate/save a static token for the 'Admin' user
+2. create a docker compose override file to set the PERMTOKEN values
+
+```sh
+cat > docker-compose.override.yaml << EOF
+services:
+  version: '3.8'
+    directus-post-init:
+      environment:
+        CMS_DIRECTUS_PERMTOKEN: '{PERMTOKEN value}'
+
+    places-api:
+      environment:
+        DirectusOptions__PermToken: '{PERMTOKEN value}'
+```
+
+Run:
+
+```bash
+docker-compose up -d
+```
+
 ### Test the Directus connection
 
 Connect with the admin `directus@example.com` account on your Directus.

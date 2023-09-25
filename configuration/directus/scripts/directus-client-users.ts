@@ -15,7 +15,7 @@ class Main {
         console.log(`CMS DIRECTUS CLIENT EMAIL: ${clientEmail}`);
 		let clientPwd = process.env.CMS_DIRECTUS_CLIENT_PASSWORD;
 		console.log(`CMS DIRECTUS CLIENT PASSWORD: ${clientPwd?.substring(0,2)}...${clientPwd?.slice(-2)}`);
-		let clientToken = process.env.CMS_DIRECTUS_CLIENT_PASSWORD;
+		let clientToken = process.env.CMS_DIRECTUS_CLIENT_TOKEN;
 		console.log(`CMS DIRECTUS CLIENT STATIC TOKEN: ${clientToken?.substring(0,2)}...${clientToken?.slice(-2)}`);
 
         const client = createDirectus<any>(<string>cmsUrl)
