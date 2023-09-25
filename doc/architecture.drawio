@@ -1,0 +1,117 @@
+<mxfile host="app.diagrams.net" modified="2023-09-25T06:55:37.274Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="P7I40q2OS4GOL1hivTsx" version="21.7.2" type="device">
+  <diagram name="Page-1" id="kjfFAkuq4WJYA48KYRBB">
+    <mxGraphModel dx="999" dy="608" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-42" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="680" y="360" width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-41" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-42">
+          <mxGeometry width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-16" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-42">
+          <mxGeometry x="11.67" y="10" width="38.33" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-18" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://miro.medium.com/v2/resize:fit:256/1*XR69xeq43LgKB0T_LjZqwQ.png;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-42">
+          <mxGeometry x="70" y="90" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-4" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="460" y="90" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-1" value="Keycloak" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-4">
+          <mxGeometry width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-3" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://cf.appdrag.com/dashboard-openvm-clo-b2d42c/uploads/Keycloak-VC4L-19JH.png;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-4">
+          <mxGeometry width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-7" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="220" y="90" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-5" value="CMS Directus" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-7">
+          <mxGeometry width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-6" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://progsoft.net/images/directus-icon-eef4bb3122109f8b035ecf997c3adf5edd57a797.png;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-7">
+          <mxGeometry y="3" width="65.94" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-21" target="QCv3PliEFTNqHR0u3MRq-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" target="QCv3PliEFTNqHR0u3MRq-20">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="150" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="160" y="150" />
+              <mxPoint x="160" y="354" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-21" value="Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="70" y="120" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-22" target="QCv3PliEFTNqHR0u3MRq-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-22" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="70" y="380" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-26" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="680" y="160" width="140" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-24" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-26">
+          <mxGeometry width="140" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-8" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-26">
+          <mxGeometry x="15" y="10" width="35" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-13" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://blog.shanelee.name/content/images/2017/04/mariadb.png;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-26">
+          <mxGeometry x="60" y="90" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-25" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-26">
+          <mxGeometry x="15" y="90" width="35" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-1" target="QCv3PliEFTNqHR0u3MRq-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-5" target="QCv3PliEFTNqHR0u3MRq-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="360" y="180" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="400" y="180" />
+              <mxPoint x="400" y="275" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-5" target="QCv3PliEFTNqHR0u3MRq-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-5" target="QCv3PliEFTNqHR0u3MRq-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="QCv3PliEFTNqHR0u3MRq-20" target="QCv3PliEFTNqHR0u3MRq-16">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="353" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-45" value="apikey" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.access_control;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="290" y="250" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-48" value="jwt" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.access_control;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="182" y="96" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-50" value="&lt;b&gt;jwt&lt;/b&gt;" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.access_control;" vertex="1" parent="1">
+          <mxGeometry x="182" y="301" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-51" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="220" y="313" width="120" height="164" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-20" value="API" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-51">
+          <mxGeometry width="120" height="164" as="geometry" />
+        </mxCell>
+        <mxCell id="QCv3PliEFTNqHR0u3MRq-32" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://static-00.iconduck.com/assets.00/dotnet-icon-256x256-ozvjws7o.png;container=0;" vertex="1" parent="QCv3PliEFTNqHR0u3MRq-51">
+          <mxGeometry x="60" y="107" width="50" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

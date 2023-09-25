@@ -20,28 +20,36 @@ class Main {
 		let permToken = process.env.CMS_DIRECTUS_PERMTOKEN;
 		console.log(`CMS DIRECTUS USER STATIC TOKEN: ${permToken?.substring(0,2)}...${permToken?.slice(-2)}`);
 
+        let placesCollectionName = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
+		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollectionName}`);
 
-        let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
-		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
+        const client = createDirectus<any>(<string>cmsUrl)
+            .with(staticToken(<string>process.env.CMS_DIRECTUS_PERMTOKEN))
+            .with(rest());
+    
+        let foundCollection = null;
         try{
-			const client = createDirectus<any>(cmsUrl as string)
-                .with(staticToken(process.env.CMS_DIRECTUS_PERMTOKEN as string))
-                .with(rest());
+            console.log(`[INFORMATION] Looking for collection: ${placesCollectionName}`);
+            foundCollection = await client.request(
+                readCollection(<string>placesCollectionName)
+            );
+        } catch($error) { }
 
-            let foundCollection = await client.request(readCollection(placesCollection as string));
-            if(foundCollection != null) {
-                console.log(`[INFORMATION] collection found: ${foundCollection.collection}`);
+        if(foundCollection != null) {
+            console.log(`[INFORMATION] collection found: ${foundCollection.collection}`);
 
-            } else {
+        } else {
+            console.log(`[INFORMATION] collection not found: ${placesCollectionName}. Let's create it!`);
+            try {
                 const directusCollection: ExtendedCollection = {
-                    collection: placesCollection,
+                    collection: placesCollectionName,
                     schema: {
-                        name: placesCollection,
+                        name: placesCollectionName,
                         schema: "directus",
                         comment: ""
                     },
                     meta:  {
-                        collection: placesCollection,
+                        collection: placesCollectionName,
                         singleton: false,
                         hidden: false,
                         archive_app_filter: true,
@@ -150,13 +158,15 @@ class Main {
                     ]
                 };
 
-                let createCollectionResp = await client.request(createCollection(directusCollection as Partial<DirectusCollection<any>>));
+                let createCollectionResp = await client.request(
+                    createCollection(directusCollection as Partial<DirectusCollection<any>>)
+                );
                 console.log(createCollectionResp);
-            }
 
-		} catch($error) {
-			console.log($error);
-			throw $error;
+            } catch($error) {
+                console.log($error);
+                throw $error;
+            }
         }
 	}
 }

@@ -89,8 +89,8 @@ class Main {
 		console.log(`API WEBHOOK URL: ${webhookUrl}`);
 
 		try{
-			const client = createDirectus<Schema>(cmsUrl as string)
-				.with(staticToken(process.env.CMS_DIRECTUS_PERMTOKEN as string))
+			const client = createDirectus<Schema>(<string>cmsUrl)
+				.with(staticToken(<string>process.env.CMS_DIRECTUS_PERMTOKEN))
 				.with(rest());
 
 			let flows = await client.request(
@@ -109,6 +109,7 @@ class Main {
 
 				if(foundEntry != null) {
 					console.log(`[INFORMATION] flow found: ${flowName}`);
+					
 				} else {
 					console.log(`[INFORMATION] flow not found: ${flowName}. Let's create it!`);
 					let flow = Main.buildDirectusFlow(placesCollection, flowAction, webhookUrl);

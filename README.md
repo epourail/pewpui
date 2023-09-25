@@ -4,6 +4,10 @@
 
 Setup and run locally using docker-compose, the PEWPUI configuration using the Directus CMS-headless and Keycloak as an IDP.
 
+### Architecture
+
+![architecture.draw](doc/architecture.drawio.png)
+
 ### Services
 
 Once launched and configured, the available services are:
