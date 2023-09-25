@@ -125,7 +125,7 @@ services:
     - ./configuration/directus/extensions/migrations:/directus/extensions/migrations
     environment:
       # General
-      PUBLIC_URL: ${CMS_DIRECTUS_PUBLIC_URL}
+      PUBLIC_URL: https://${pewpui.mvp.local}:8443/cms
       LOG_LEVEL: info
       # Default role
       CMS_DIRECTUS_DEFAULT_ROLE_ID: ${CMS_DIRECTUS_DEFAULT_ROLE_ID}
