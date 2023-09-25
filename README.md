@@ -46,7 +46,7 @@ Run:
 docker-compose up -d --build
 ```
 
-_note_: At this step, the first time, the startup will fail has the Directus PERMTOKEN is not set correctly.
+_note_: At this step, the first time, the startup will fail as the Directus PERMTOKEN is not set correctly.
 
 Follow this steps to end the setup:
 
