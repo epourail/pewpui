@@ -229,7 +229,6 @@ services:
       context: ./configuration/directus/scripts
       dockerfile: ./Dockerfile
     command: 'init-places'
-    #command: 'add-client-users'
     depends_on:
       directus:
         condition: service_healthy      
