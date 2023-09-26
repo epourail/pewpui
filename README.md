@@ -2,34 +2,40 @@
 
 ## Introduction
 
-Setup and run locally using docker-compose, the PEWPUI configuration using the Directus CMS-headless and Keycloak as an IDP.
+Setup and run locally using docker-compose, the PEWPUI configuration using the Directus CMS-headless, the Keycloak as an IDP and a secured API to manage a directus collection.
 
 ### Architecture
 
 ![architecture.draw](doc/architecture.drawio.png)
 
+- The `administrator` is in charge to manage the CMS and the keycloak backoffice
+- The `contributor` is in charge to manage (create/update/delete) a unique collection (named "places") via jwt-protected endpoints.
+- The `user` can only read a unique collection (named "places") via an anonyous endpoint.
+
 ### Services
 
 Once launched and configured, the available services are:
 
-* Keycloak to manage the users of the directus service
-  * admin UI (`keycloak`, `keycloak`): https://pewpui.mvp.local:8443/auth
-  * https://pewpui.mvp.local:8443/auth/realms/pewpui/.well-known/openid-configuration
+- Keycloak to manage the users of the directus service
+  - admin UI (`keycloak`, `keycloak`): https://pewpui.mvp.local:8443/auth
+  - https://pewpui.mvp.local:8443/auth/realms/pewpui/.well-known/openid-configuration
 
-* Directus to manage the pewpui data:
-  * admin UI (`directus@example.com`, `directus`): https://pewpui.mvp.local:8443/cms
-  * keycloak user (`guest` or `guest@example.com`, `guest`)
-  * keycloak admin user (`admin` or `admin@example.com`, `admin`)
+- Directus to manage the pewpui data:
+  - admin UI (`directus@example.com`, `directus`): https://pewpui.mvp.local:8443/cms
+  - keycloak user (`guest` or `guest@example.com`, `guest`)
+  - keycloak admin user (`admin` or `admin@example.com`, `admin`)
 
-* Adminer to query the database:  
-  * admin UI: https://pewpui.mvp.local:8443/adminer
+- Adminer to query the database:  
+  - admin UI: https://pewpui.mvp.local:8443/adminer
 
-* Mariadb to manage the database
+- Mariadb to manage the database
 
-* Redis to manage the cached data
+- Redis to manage the cached data
 
-* Kong to manage the reverse proxy between services
-  
+- Kong to manage the reverse proxy between services
+
+- An API to manage (CRUD) a "places" Directus collection.
+
 ## Getting Started
 
 ### Build process
