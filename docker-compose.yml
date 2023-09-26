@@ -7,9 +7,21 @@ services:
 
   # Gateway (Kong)
   # -----------------------------------------------------------------------------
+  kong-pre-init:
+    container_name: ${COMPOSE_PROJECT_NAME}_gateway-pre-init
+    image: busybox:1.36
+    command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/kong/kong.tpl.yml > /tmp/kong/kong.docker.yml"
+    volumes:
+      - ./configuration/kong:/tmp/kong:rw
+    networks:
+      - back
+
   kong:
-    container_name: gateway
+    container_name: ${COMPOSE_PROJECT_NAME}_gateway
     image: kong:3.3
+    depends_on:
+      kong-pre-init:
+        condition: service_completed_successfully
     environment:
       KONG_LOG_LEVEL: info
       KONG_DATABASE: "off"
@@ -33,7 +45,7 @@ services:
       - "8443:8443"
       - "8444:8444"
     volumes:
-      - ./configuration/kong:/etc/kong:ro
+      - ./configuration/kong/kong.docker.yml:/etc/kong/kong.yml:ro
       - ./configuration/kong/certs:/ssl:ro
     networks:
       - back
@@ -42,7 +54,7 @@ services:
   # Cache (Redis)
   # -----------------------------------------------------------------------------
   cache:
-    container_name: cache
+    container_name: ${COMPOSE_PROJECT_NAME}_cache
     image: redis:7.0-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -55,7 +67,7 @@ services:
   # Database (MariaDb)
   # -----------------------------------------------------------------------------
   database:
-    container_name: database
+    container_name: ${COMPOSE_PROJECT_NAME}_mariadb
     image: mariadb:11.0.2
     restart: always
     volumes:
@@ -73,7 +85,7 @@ services:
     - back
 
   mongodb:
-    container_name: mongodb
+    container_name: ${COMPOSE_PROJECT_NAME}_mongodb
     image: mongo:6.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -83,13 +95,13 @@ services:
       MONGO_PLACES_USERNAME: ${DB_PLACES_USERNAME}
       MONGO_PLACES_PASSWORD: ${DB_PLACES_PASSWORD}
     healthcheck:
-      test: ['CMD', 'healthcheck.sh', 'mongodb', '27017']
+      test: ['CMD', 'healthcheck.sh', '${DB_MONGODB_INTERNAL_HOST}', '${DB_MONGODB_INTERNAL_PORT}']
       interval: 20s
       timeout: 5s
       retries: 10
     volumes:
       - ./configuration/mongodb/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
-#      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+      - ./configuration/mongodb/init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
       - mongodb_data:/data/db
     networks:
       - back
@@ -97,7 +109,7 @@ services:
   # CMS (Directus)
   # -----------------------------------------------------------------------------
   directus:
-    container_name: directus
+    container_name: ${COMPOSE_PROJECT_NAME}_directus
     image: directus/directus:10.5
     restart: unless-stopped
     depends_on:
@@ -113,7 +125,7 @@ services:
     - ./configuration/directus/extensions/migrations:/directus/extensions/migrations
     environment:
       # General
-      PUBLIC_URL: ${CMS_DIRECTUS_PUBLIC_URL}
+      PUBLIC_URL: https://${PUBLIC_HOST}:8443/cms
       LOG_LEVEL: info
       # Default role
       CMS_DIRECTUS_DEFAULT_ROLE_ID: ${CMS_DIRECTUS_DEFAULT_ROLE_ID}
@@ -126,8 +138,8 @@ services:
       ADMIN_PASSWORD: ${CMS_DIRECTUS_ADMIN_PASSWORD}
       # Database
       DB_CLIENT: mysql
-      DB_HOST: ${DB_INTERNAL_HOST}
-      DB_PORT: ${DB_INTERNAL_PORT}
+      DB_HOST: ${DB_MARIADB_INTERNAL_HOST}
+      DB_PORT: ${DB_MARIADB_INTERNAL_PORT}
       DB_DATABASE: ${DB_DIRECTUS_DATABASE}
       DB_USER: ${DB_DIRECTUS_USERNAME}
       DB_PASSWORD: ${DB_DIRECTUS_PASSWORD}
@@ -160,8 +172,17 @@ services:
 
   # IDP (Keycloak)
   # -----------------------------------------------------------------------------
+  keycloak-pre-init:
+    container_name: ${COMPOSE_PROJECT_NAME}_keycloak-pre-init
+    image: busybox:1.36
+    command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/keycloak/realm.tpl/realm-pewpui.tpl.json > /tmp/keycloak/realm/realm-pewpui.docker.json"
+    volumes:
+      - ./configuration/keycloak:/tmp/keycloak:rw
+    networks:
+      - back
+  
   keycloak:
-    container_name: keycloak
+    container_name: ${COMPOSE_PROJECT_NAME}_keycloak
     image: quay.io/keycloak/keycloak:22.0
     depends_on:
       database:
@@ -169,7 +190,7 @@ services:
     command: "start --http-enabled=true --import-realm"
     volumes:
     - ./configuration/keycloak/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
-    - ./configuration/keycloak/realm:/opt/keycloak/data/import
+    - ./configuration/keycloak/realm:/opt/keycloak/data/import:ro
     environment:
       # Admin Account
       KEYCLOAK_ADMIN: ${IDP_KEYCLOAK_ADMIN_USERNAME}
@@ -182,12 +203,12 @@ services:
       KC_PROXY: edge
       PROXY_ADDRESS_FORWARDING: 'true'
       # Hostname
-      KC_HOSTNAME_ADMIN_URL: ${IDP_KEYCLOAK_HOSTNAME_ADMIN_URL}
-      KC_HOSTNAME_URL: ${IDP_KEYCLOAK_HOSTNAME_URL}
+      KC_HOSTNAME_ADMIN_URL: https://${PUBLIC_HOST}:8443/auth
+      KC_HOSTNAME_URL: https://${PUBLIC_HOST}:8443/auth
       # Database
       KC_DB: mariadb
-      KC_DB_URL_HOST: ${DB_INTERNAL_HOST}
-      KC_DB_URL_PORT: ${DB_INTERNAL_PORT}
+      KC_DB_URL_HOST: ${DB_MARIADB_INTERNAL_HOST}
+      KC_DB_URL_PORT: ${DB_MARIADB_INTERNAL_PORT}
       KC_DB_URL_DATABASE: ${DB_KEYCLOAK_DATABASE}
       KC_DB_USERNAME: ${DB_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
@@ -200,61 +221,49 @@ services:
       - front
       - back
 
-  # Domain: places (init directus data model)
+  # Places Domain: init
   # -----------------------------------------------------------------------------
-  directus-init-places:
-    container_name: directus-init-places
+  directus-post-init:
+    container_name: ${COMPOSE_PROJECT_NAME}_directus-post-init
     build:
       context: ./configuration/directus/scripts
       dockerfile: ./Dockerfile
-    environment:
-      CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
-      CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
-      CMS_DIRECTUS_PLACES_COLLECTION: 'places'
-    command: 'add-places-collection'
+    command: 'init-places'
     depends_on:
       directus:
-        condition: service_healthy
-    networks:
-      - back
-
-  # Domain: places (init directus data model)
-  # -----------------------------------------------------------------------------
-  directus-init-flows:
-    container_name: directus-init-flows
-    build:
-      context: ./configuration/directus/scripts
-      dockerfile: ./Dockerfile
+        condition: service_healthy      
     environment:
       CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
       CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
+      CMS_DIRECTUS_CLIENT_EMAIL: ${CMS_DIRECTUS_CLIENT_EMAIL}
+      CMS_DIRECTUS_CLIENT_PASSWORD: ${CMS_DIRECTUS_CLIENT_PASSWORD}
+      CMS_DIRECTUS_CLIENT_TOKEN: ${CMS_DIRECTUS_CLIENT_TOKEN}
+      CMS_DIRECTUS_ADMIN_EMAIL: '${CMS_DIRECTUS_ADMIN_EMAIL}'
+      CMS_DIRECTUS_ADMIN_PASSWORD: '${CMS_DIRECTUS_ADMIN_PASSWORD}'
       CMS_DIRECTUS_PLACES_COLLECTION: 'places'
       API_WEBHOOK_URL: 'http://${API_PLACES_INTERNAL_HOST}:${API_PLACES_INTERNAL_PORT}/webhook/places'
-    command: 'add-places-flows'
-    depends_on:
-      directus-init-places:
-        condition: service_completed_successfully
     networks:
       - back
 
-  # Domain: places (init directus data model)
+  # Places domain: Api
   # -----------------------------------------------------------------------------
   places-api:
-    container_name: places-api
+    container_name: ${COMPOSE_PROJECT_NAME}_places-api
     build: 
       context: ./api
       dockerfile: POC.FNow.Api/Dockerfile
+    depends_on:
+      directus-post-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       DirectusOptions__Url: http://${KONG_INTERNAL_HOST}:${KONG_INTERNAL_PORT}/cms
       DirectusOptions__ExtraHeaders__Host: ${PUBLIC_HOST}
       DirectusOptions__PermToken: 'XXXXX'
-      MongoDbOptions__ConnectionString: 'mongodb://root:secret@mongodb:27017'
-    depends_on:
-      directus-init-flows:
-        condition: service_completed_successfully
-      mongodb:
-        condition: service_healthy
+      MongoDbOptions__ConnectionString: 'mongodb://${DB_PLACES_USERNAME}:${DB_PLACES_PASSWORD}@${DB_MONGODB_INTERNAL_HOST}:${DB_MONGODB_INTERNAL_PORT}'
+      MongoDbOptions__DatabaseName: ${DB_PLACES_DATABASE}
     networks:
       - front
       - back

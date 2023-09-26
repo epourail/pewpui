@@ -6,7 +6,7 @@ services:
   routes:
   - name: directus-route
     hosts:
-    - 'pewpui.mvp.local'
+    - '##PUBLIC_HOST##'
     paths:
     - '/cms'
     strip_path: true
@@ -19,7 +19,7 @@ services:
     - '/auth'
     strip_path: true
     hosts:
-    - 'pewpui.mvp.local'
+    - '##PUBLIC_HOST##'
 
 - name: adminer-service
   url: http://adminer:8080
@@ -30,7 +30,7 @@ services:
     strip_path: true
     preserve_host: true
     hosts:
-    - 'pewpui.mvp.local'
+    - '##PUBLIC_HOST##'
 
 - name: api-places-service
   url: http://places-api:80
@@ -41,7 +41,7 @@ services:
     strip_path: true
     preserve_host: true
     hosts:
-    - 'pewpui.mvp.local'
+    - '##PUBLIC_HOST##'
 
 # plugins:
 # - name: cors
