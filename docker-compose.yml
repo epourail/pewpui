@@ -203,8 +203,8 @@ services:
       KC_PROXY: edge
       PROXY_ADDRESS_FORWARDING: 'true'
       # Hostname
-      KC_HOSTNAME_ADMIN_URL: ${IDP_KEYCLOAK_HOSTNAME_ADMIN_URL}
-      KC_HOSTNAME_URL: ${IDP_KEYCLOAK_HOSTNAME_URL}
+      KC_HOSTNAME_ADMIN_URL: https://${PUBLIC_HOST}:8443/auth
+      KC_HOSTNAME_URL: https://${PUBLIC_HOST}:8443/auth
       # Database
       KC_DB: mariadb
       KC_DB_URL_HOST: ${DB_MARIADB_INTERNAL_HOST}
