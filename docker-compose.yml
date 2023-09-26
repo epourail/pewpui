@@ -175,7 +175,7 @@ services:
   keycloak-pre-init:
     container_name: ${COMPOSE_PROJECT_NAME}_keycloak-pre-init
     image: busybox:1.36
-    command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/keycloak/realm/realm-pewpui.tpl.json > /tmp/keycloak/realm/realm-pewpui.docker.json"
+    command: sh -c "sed 's/##PUBLIC_HOST##/${PUBLIC_HOST}/g' /tmp/keycloak/realm.tpl/realm-pewpui.tpl.json > /tmp/keycloak/realm/realm-pewpui.docker.json"
     volumes:
       - ./configuration/keycloak:/tmp/keycloak:rw
     networks:
@@ -190,7 +190,7 @@ services:
     command: "start --http-enabled=true --import-realm"
     volumes:
     - ./configuration/keycloak/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
-    - ./configuration/keycloak/realm/realm-pewpui.docker.json:/opt/keycloak/data/import/real-pewpui.json:ro
+    - ./configuration/keycloak/realm:/opt/keycloak/data/import:ro
     environment:
       # Admin Account
       KEYCLOAK_ADMIN: ${IDP_KEYCLOAK_ADMIN_USERNAME}
