@@ -6,8 +6,8 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "init-places": "npm run add-places-collection && npm run add-places-flows && npm run add-places-clients",
-    "add-places-clients": "npx ts-node ./directus-places-clients.ts",
+    "init-places": "npm run add-places-collection && npm run add-places-flows && npm run add-places-client",
+    "add-places-client": "npx ts-node ./directus-places-client.ts",
     "add-places-collection": "npx ts-node ./directus-places-collection.ts",
     "add-places-flows": "npx ts-node ./directus-places-flows.ts"
   },
