@@ -234,7 +234,6 @@ services:
         condition: service_healthy      
     environment:
       CMS_DIRECTUS_URL: 'http://${CMS_DIRECTUS_INTERNAL_HOST}:${CMS_DIRECTUS_INTERNAL_PORT}'
-      CMS_DIRECTUS_PERMTOKEN: 'XXXXX'
       CMS_DIRECTUS_CLIENT_EMAIL: ${CMS_DIRECTUS_CLIENT_EMAIL}
       CMS_DIRECTUS_CLIENT_PASSWORD: ${CMS_DIRECTUS_CLIENT_PASSWORD}
       CMS_DIRECTUS_CLIENT_TOKEN: ${CMS_DIRECTUS_CLIENT_TOKEN}
@@ -261,7 +260,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       DirectusOptions__Url: http://${KONG_INTERNAL_HOST}:${KONG_INTERNAL_PORT}/cms
       DirectusOptions__ExtraHeaders__Host: ${PUBLIC_HOST}
-      DirectusOptions__PermToken: 'XXXXX'
+      DirectusOptions__PermToken: ${CMS_DIRECTUS_CLIENT_TOKEN}
       MongoDbOptions__ConnectionString: 'mongodb://${DB_PLACES_USERNAME}:${DB_PLACES_PASSWORD}@${DB_MONGODB_INTERNAL_HOST}:${DB_MONGODB_INTERNAL_PORT}'
       MongoDbOptions__DatabaseName: ${DB_PLACES_DATABASE}
     networks:

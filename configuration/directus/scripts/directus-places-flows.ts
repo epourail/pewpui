@@ -1,6 +1,19 @@
-import { createDirectus, staticToken, rest, readFlows, createFlow, NestedPartial, DirectusFlow } from '@directus/sdk';
+import { 
+	authentication, 
+	createDirectus, 
+	createFlow, 
+	DirectusFlow ,
+	NestedPartial, 
+	readFlows, 
+	rest, 
+} from '@directus/sdk';
 import dotenv from "dotenv";
-import  { FlowConfig, OperationsConfig, TriggerConfig, createDirectusFlow } from './flows';
+import  { 
+	createDirectusFlow,
+	FlowConfig, 
+	OperationsConfig, 
+	TriggerConfig, 
+} from './flows';
 
 interface Place {
 	id: string;
@@ -14,6 +27,26 @@ interface Schema {
 dotenv.config();
 
 class Main {
+	// Define constants for admin environment variables
+	static readonly CMS_URL : string = <string> process.env.CMS_DIRECTUS_URL;
+	static readonly ADMIN_EMAIL: string  = <string> process.env.CMS_DIRECTUS_ADMIN_EMAIL;
+	static readonly ADMIN_PWD : string = <string> process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
+	// Define constants for user environment variables
+	static readonly CMS_PLACES_COLLECTION : string = <string> process.env.CMS_DIRECTUS_PLACES_COLLECTION;
+	static readonly API_WEBHOOK_URL: string = <string> process.env.API_WEBHOOK_URL;
+
+	/***
+	 * Log the .env variables
+	 */
+	static logEnvInfo() {
+		console.log(`CMS DIRECTUS PUBLIC URL: ${Main.CMS_URL}`);
+		console.log(`CMS DIRECTUS ADMIN EMAIL: ${Main.ADMIN_EMAIL}`);
+		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${Main.ADMIN_PWD?.substring(0,2)}...${Main.ADMIN_PWD?.slice(-2)}`);
+		console.log(`CMS DIRECTUS PLACES COLLECTION: ${Main.CMS_PLACES_COLLECTION}`);
+		console.log(`API WEBHOOK URL: ${Main.API_WEBHOOK_URL}`);
+	}
+
+		
 	static buildDirectusFlowName(collection: string, action: string){
 		return `${collection}-${action}-event`;
 	}
@@ -66,7 +99,7 @@ class Main {
 		return directusFlow;
 	}
 
-	static async main(){
+	static async createFlowsIfNotExist(client : any) {
 
 		const flowActions = [
 			"create", 
@@ -74,24 +107,7 @@ class Main {
 			"delete"
 		];
 		
-		let cmsUrl = process.env.CMS_DIRECTUS_URL;
-		console.log(`CMS DIRECTUS PUBLIC URL: ${cmsUrl}`);
-		let permToken = process.env.CMS_DIRECTUS_PERMTOKEN;
-		console.log(`CMS DIRECTUS USER STATIC TOKEN: ${permToken?.substring(0,2)}...${permToken?.slice(-2)}`);
-		let adminEmail = process.env.CMS_DIRECTUS_ADMIN_EMAIL;
-		console.log(`CMS DIRECTUS ADMIN EMAIL: ${adminEmail}`);
-		let adminPwd = process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
-		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${adminPwd?.substring(0,2)}...${adminPwd?.slice(-2)}`);
-
-		let placesCollection = process.env.CMS_DIRECTUS_PLACES_COLLECTION ?? '';
-		console.log(`CMS DIRECTUS PLACES COLLECTION: ${placesCollection}`);
-		let webhookUrl = process.env.API_WEBHOOK_URL ?? '';
-		console.log(`API WEBHOOK URL: ${webhookUrl}`);
-
 		try{
-			const client = createDirectus<Schema>(<string>cmsUrl)
-				.with(staticToken(<string>process.env.CMS_DIRECTUS_PERMTOKEN))
-				.with(rest());
 
 			let flows = await client.request(
 				readFlows({
@@ -100,30 +116,52 @@ class Main {
 			);
 
 			flowActions.forEach(async flowAction => {
-				let flowName = Main.buildDirectusFlowName(placesCollection, flowAction);
-				console.log(`[INFORMATION] Looking for flow: ${flowName}`);
+				const flowName = Main.buildDirectusFlowName(Main.CMS_PLACES_COLLECTION, flowAction);
+				console.log(`[INFO] Looking for flow: ${flowName}`);
 
-				let foundEntry = flows.find((flow: { name: string; }) => {
+				const foundEntry = flows.find((flow: { name: string; }) => {
 					return flow.name == flowName;
 				});
 
 				if(foundEntry != null) {
-					console.log(`[INFORMATION] flow found: ${flowName}`);
+					console.log(`[INFO] flow found: ${flowName}`);
 					
 				} else {
-					console.log(`[INFORMATION] flow not found: ${flowName}. Let's create it!`);
-					let flow = Main.buildDirectusFlow(placesCollection, flowAction, webhookUrl);
-					let responseCreateFlow = await client.request(createFlow(flow));
+					console.log(`[INFO] flow not found: ${flowName}. Let's create it!`);
+					const flow = Main.buildDirectusFlow(Main.CMS_PLACES_COLLECTION, flowAction, Main.API_WEBHOOK_URL);
+					const responseCreateFlow = await client.request(createFlow(flow));
 					console.log(responseCreateFlow);
-					console.log(`[INFORMATION] flow created: ${flowName}`);
+					console.log(`[INFO] flow created: ${flowName}`);
 				}
 			});
 			
 		} catch($error) {
 			console.log($error);
 			throw $error;
+
 		}
 	}
+
+		/***
+	 * Main execution function
+	 */
+		static async main() {
+			try {
+				Main.logEnvInfo();
+	
+				const client = createDirectus<any>(Main.CMS_URL)
+					.with(authentication('json'))
+					.with(rest());
+	
+				await client.login(Main.ADMIN_EMAIL, Main.ADMIN_PWD);
+				await Main.createFlowsIfNotExist(client);
+				await client.logout();
+	
+			} catch (error) {
+				console.error(`[ERROR] Main function encountered an error`, error);
+	
+			}
+		}
 }
 
 Main.main();
