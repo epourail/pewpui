@@ -175,8 +175,7 @@ class Main {
 			}
 
 		} catch (error) {
-			console.error(`[ERROR] Failed to create a new collection`);
-            console.error(error);
+			console.error(`[ERROR] Failed to create a new collection`, error);
 			throw error;
 
 		}
@@ -190,7 +189,7 @@ class Main {
 	static async getCollectionByName(client: any, name: string) : Promise<DirectusCollection<any> | undefined> {
 		try{
             console.log(`[INFO] Looking for collection: ${name}`);
-            return client.request(
+            return await client.request(
                 readCollection(name)
             );
         } catch($error) { }
@@ -210,14 +209,12 @@ class Main {
 			await client.login(Main.ADMIN_EMAIL, Main.ADMIN_PWD);
 			await Main.createCollectionIfNotExist(client);
 	
-
 		} catch (error: any) {
 			console.error(`[ERROR] Main function encountered an error`, error);
-            console.error(error.errors[0].extensions);
 
 		} finally {
             await client.logout();
-            
+
         }
 	}
 }
