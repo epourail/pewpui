@@ -21,13 +21,13 @@ type PermissionsAction = "create" | "read" | "update" | "delete" | "share";
 
 class Main {
 	// Define constants for admin environment variables
-	static readonly CMS_URL : string = <string> process.env.CMS_DIRECTUS_URL;
-	static readonly ADMIN_EMAIL: string  = <string> process.env.CMS_DIRECTUS_ADMIN_EMAIL;
-	static readonly ADMIN_PWD : string = <string> process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
+	static readonly CMS_URL: string = <string>process.env.CMS_DIRECTUS_URL;
+	static readonly ADMIN_EMAIL: string = <string>process.env.CMS_DIRECTUS_ADMIN_EMAIL;
+	static readonly ADMIN_PWD: string = <string>process.env.CMS_DIRECTUS_ADMIN_PASSWORD;
 	// Define constants for user environment variables
-	static readonly CLIENT_EMAIL : string = <string> process.env.CMS_DIRECTUS_CLIENT_EMAIL;
-	static readonly CLIENT_PWD: string = <string> process.env.CMS_DIRECTUS_CLIENT_PASSWORD;
-	static readonly CLIENT_TOKEN : string = <string> process.env.CMS_DIRECTUS_CLIENT_TOKEN;
+	static readonly CLIENT_EMAIL: string = <string>process.env.CMS_DIRECTUS_CLIENT_EMAIL;
+	static readonly CLIENT_PWD: string = <string>process.env.CMS_DIRECTUS_CLIENT_PASSWORD;
+	static readonly CLIENT_TOKEN: string = <string>process.env.CMS_DIRECTUS_CLIENT_TOKEN;
 
 	/***
 	 * Log the .env variables
@@ -35,10 +35,10 @@ class Main {
 	static logEnvInfo() {
 		console.log(`CMS DIRECTUS PUBLIC URL: ${Main.CMS_URL}`);
 		console.log(`CMS DIRECTUS ADMIN EMAIL: ${Main.ADMIN_EMAIL}`);
-		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${Main.ADMIN_PWD?.substring(0,2)}...${Main.ADMIN_PWD?.slice(-2)}`);
+		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${Main.ADMIN_PWD?.substring(0, 2)}...${Main.ADMIN_PWD?.slice(-2)}`);
 		console.log(`CMS DIRECTUS CLIENT EMAIL: ${Main.CLIENT_EMAIL}`);
-		console.log(`CMS DIRECTUS CLIENT PASSWORD: ${Main.CLIENT_PWD?.substring(0,2)}...${Main.CLIENT_PWD?.slice(-2)}`);
-		console.log(`CMS DIRECTUS CLIENT STATIC TOKEN: ${Main.CLIENT_TOKEN?.substring(0,2)}...${Main.CLIENT_TOKEN?.slice(-2)}`);
+		console.log(`CMS DIRECTUS CLIENT PASSWORD: ${Main.CLIENT_PWD?.substring(0, 2)}...${Main.CLIENT_PWD?.slice(-2)}`);
+		console.log(`CMS DIRECTUS CLIENT STATIC TOKEN: ${Main.CLIENT_TOKEN?.substring(0, 2)}...${Main.CLIENT_TOKEN?.slice(-2)}`);
 	}
 
 	/***
@@ -46,7 +46,7 @@ class Main {
 	 * @param client - Directus client
 	 * @param email - Email of the user
 	 */
-	static async findUserByEmail(client: any, email: string) : Promise<DirectusUser<any> | undefined> {
+	static async findUserByEmail(client: any, email: string): Promise<DirectusUser<any> | undefined> {
 		try {
 			const query = { filter: { email: { _eq: email } } }
 			const users = await client.request(readUsers(query));
@@ -61,24 +61,24 @@ class Main {
 		}
 	}
 
-		/***
-	 * @param client - Directus client
-	 * @param name - Name of the role
-	 */
-		static async findRoleByName(client: any, name: string) : Promise<DirectusRole<any> | undefined> {
-			try {
-				const query = { filter: { name: { _eq: name } } }
-				const roles = await client.request(readRoles(query));
-				if (roles.length > 1) {
-					throw new Error('multiple role(s) found');
-				}
-				return roles[1];
-
-			} catch (error) {
-				console.error('Failed to fetch role:', error);
-
+	/***
+ * @param client - Directus client
+ * @param name - Name of the role
+ */
+	static async findRoleByName(client: any, name: string): Promise<DirectusRole<any> | undefined> {
+		try {
+			const query = { filter: { name: { _eq: name } } }
+			const roles = await client.request(readRoles(query));
+			if (roles.length > 1) {
+				throw new Error('multiple role(s) found');
 			}
+			return roles[1];
+
+		} catch (error) {
+			console.error('Failed to fetch role:', error);
+
 		}
+	}
 
 	/***
 	 * If the user is not found, then we will create one and return it.
@@ -118,7 +118,7 @@ class Main {
 	 * @param roleName - The name of the role
 	 * @param userId - The id of the user to add in the role
 	 */
-	static async createRoleIfNotExist(client : any, roleName : string, userId : string) {
+	static async createRoleIfNotExist(client: any, roleName: string, userId: string) {
 		try {
 			const foundRole = await Main.findRoleByName(client, roleName);
 			if (foundRole) {
@@ -127,7 +127,7 @@ class Main {
 			} else {
 				console.log(`[INFO] Role with name: ${roleName} not found. Let's create it!`);
 
-				const rolePayload : NestedPartial<DirectusRole<any>> = {
+				const rolePayload: NestedPartial<DirectusRole<any>> = {
 					"name": roleName,
 					"app_access": false,
 					"admin_access": false
@@ -136,7 +136,6 @@ class Main {
 				const newRole = await client.request(createRole(rolePayload));
 				await Main.addRolePermissions(client, newRole.id, "places");
 
-				console.log(newRole)
 				return newRole;
 			}
 
@@ -153,14 +152,13 @@ class Main {
 	 * @param roleName - The name of the role
 	 * @param userId - The id of the user to add in the role
 	 */
-	static async attachRoleToUser(client : any, roleId : string, userId : string) {
+	static async attachRoleToUser(client: any, roleId: string, userId: string) {
 		try {
-			const rolePayload : NestedPartial<DirectusRole<any>> = {
+			const rolePayload: NestedPartial<DirectusRole<any>> = {
 				"users": [userId]
 			};
 
 			const newRole = await client.request(updateRole(roleId, rolePayload));
-			console.log(newRole)
 
 		} catch (error) {
 			console.error(`[ERROR] Failed to create a new role`, error);
@@ -175,7 +173,7 @@ class Main {
 	 * @param role - Id of the role
 	 * @param collection - The collection name
 	 */
-	static async addRolePermissions(client : any, role: string, collection : string) {
+	static async addRolePermissions(client: any, role: string, collection: string) {
 		try {
 			console.log("[INFO] Creating role permissions");
 			const actions: PermissionsAction[] = ["create", "read", "update", "delete"];
@@ -188,8 +186,6 @@ class Main {
 				permissions: {},
 				validation: {}
 			}));
-
-			console.log(permissions)
 
 			return await client.request(createPermissions(permissions));
 
@@ -204,7 +200,7 @@ class Main {
 	 * First create an user, if created it will attach a role to it
 	 * @param client - Directus client
 	 */
-	static async createUserAndAttachRole(client : any) {
+	static async createUserAndAttachRole(client: any) {
 		try {
 			const createdUser = await Main.createUserIfNotExist(client);
 			if (createdUser) {
@@ -212,7 +208,7 @@ class Main {
 				await Main.attachRoleToUser(client, role.id, createdUser.id);
 			}
 
-		} catch (error : any) {
+		} catch (error: any) {
 			console.error("[ERROR] : Can't create the user and role: ", error);
 			throw error;
 
