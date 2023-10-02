@@ -1,0 +1,44 @@
+---
+# https://docs.cerbos.dev/cerbos/latest/configuration/server
+server:
+  httpListenAddr: ":3592"
+  grpcListenAddr: ":3593"
+  metricsEnabled: true
+  logRequestPayloads: false
+  cors: 
+    disabled: true
+  adminAPI:
+    enabled: true
+    adminCredentials:
+      username: cerbos
+      passwordHash: JDJ5JDEwJEZ6bGFwMWphaUJja0ZrYldYWDZtVWUyLjZNeW1xS3JOdXU0U2JHaUt5dUZ4c1BDUlZiUnouCgo=
+
+# https://docs.cerbos.dev/cerbos/latest/configuration/audit
+audit: 
+  enable: true
+  accessLogsEnabled: true
+  decisionLogsEnabled: true
+
+# https://docs.cerbos.dev/cerbos/latest/configuration/telemetry
+telemetry:
+  disabled: true
+
+# https://docs.cerbos.dev/cerbos/latest/configuration/auxdata
+auxData:
+  jwt:
+    disableVerification: false
+    keySets:
+      - id: default
+        remote:
+          url: http://keycloak:8080/realms/pewpui/protocol/openid-connect/certs
+
+# https://docs.cerbos.dev/cerbos/latest/configuration/engine
+engine:
+  defaultPolicyVersion: "default"
+
+# https://docs.cerbos.dev/cerbos/latest/configuration/storage
+storage:
+  driver: disk
+  disk:
+    directory: /data/policies
+    watchForChanges: true

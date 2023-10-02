@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Keycloak
+  # -----------------------------------------------------------------------------
+  # keycloak:
+  #   command: "export --file /opt/keycloak/data/tmp/realm-pewpui.json --realm pewpui --users realm_file"
+  #   volumes:
+  #     - ./configuration/keycloak/realm/realm-pewpui.json:/opt/keycloak/data/tmp/realm-pewpui.json:rw
+
+  # Tools: mongo-express
+  # -----------------------------------------------------------------------------
+  mongodb-express:
+    container_name: ${COMPOSE_PROJECT_NAME}_mongodb-express
+    image: mongo-express:latest
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_PLACES_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_PLACES_PASSWORD}
+      ME_CONFIG_MONGODB_URL: 'mongodb://root:secret@${DB_MONGODB_INTERNAL_HOST}:${DB_MONGODB_INTERNAL_PORT}?ssl=false'
+    ports:
+      - "8081:8081"
+    depends_on:
+      mongodb:
+        condition: service_started
+    networks:
+      - front
+      - back
+
+
+  # Tools: adminer
+  # -----------------------------------------------------------------------------
+  adminer:
+    container_name: ${COMPOSE_PROJECT_NAME}_adminer
+    image: adminer:4.8.1
+    environment:
+      ADMINER_DESIGN: mvt
+      ADMINER_DEFAULT_SERVER: ${DB_MARIADB_INTERNAL_HOST}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - back
+      - front
+
+  # Tools: swagger
+  # -----------------------------------------------------------------------------
+  swagger:
+    container_name: ${COMPOSE_PROJECT_NAME}_swagger
+    image: swaggerapi/swagger-ui
+    environment:
+      BASE_URL: '/swagger'
+      URLS: "[
+          { url: \"https://${PUBLIC_HOST}:${PUBLIC_PORT}/iam/schema/swagger.json\", name: \"Cerbos\" },
+          { url: \"https://${PUBLIC_HOST}:${PUBLIC_PORT}/api/swagger/v1/swagger.json\", name: \"Api.Places\" }
+        ]"
+    depends_on:
+      cerbos:
+        condition: service_healthy
+    networks:
+      - back
+      - front

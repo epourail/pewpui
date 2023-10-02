@@ -21,6 +21,16 @@ services:
     hosts:
     - '##PUBLIC_HOST##'
 
+- name: cerbos-service
+  url: http://cerbos:3592
+  routes:
+  - name: cerbos-route
+    paths:
+    - '/iam'
+    strip_path: true
+    hosts:
+    - '##PUBLIC_HOST##'
+
 - name: adminer-service
   url: http://adminer:8080
   routes:
@@ -28,6 +38,17 @@ services:
     paths:
     - '/adminer'
     strip_path: true
+    preserve_host: true
+    hosts:
+    - '##PUBLIC_HOST##'
+
+- name: swagger-service
+  url: http://swagger:8080
+  routes:
+  - name: swagger-route
+    paths:
+    - '/swagger'
+    strip_path: false
     preserve_host: true
     hosts:
     - '##PUBLIC_HOST##'
@@ -43,11 +64,12 @@ services:
     hosts:
     - '##PUBLIC_HOST##'
 
-# plugins:
-# - name: cors
-#   config:
-#     origins:
-#     - '*'
+plugins:
+- name: cors
+  config:
+    origins:
+    - '*'
+
 # - name: response-transformer
 #   config:
 #     add:

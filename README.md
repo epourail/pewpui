@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Setup and run locally using docker-compose, the PEWPUI configuration using the Directus CMS-headless, the Keycloak as an IDP and a secured API to manage a directus collection.
+Setup and run locally, using docker-compose, the PEWPUI configuration using the Directus CMS-headless, Keycloak as an IDP, Cerbos as an IAM and a secured API to manage a directus collection.
 
-### Architecture
+## Architecture
 
 ![architecture.draw](doc/architecture.drawio.png)
 
@@ -12,21 +12,23 @@ Setup and run locally using docker-compose, the PEWPUI configuration using the D
 - The `contributor` is in charge to manage (create/update/delete) a unique collection (named "places") via jwt-protected endpoints.
 - The `user` can only read a unique collection (named "places") via an anonyous endpoint.
 
-### Services
+## Services
 
-Once launched and configured, the available services are:
+### Main services
 
-- Keycloak to manage the users of the directus service
+Once launched and configured, the available services, defined in the `docker-compose.yml` file, are:
+
+- Keycloak to manage and authenticate the users of the directus/APIs services
   - admin UI (`keycloak`, `keycloak`): https://pewpui.mvp.local:8443/auth
   - https://pewpui.mvp.local:8443/auth/realms/pewpui/.well-known/openid-configuration
+
+- Cerbos to manage the ACL rules and authorize the users of the directus/APIs services
+  - admin API (`cerbos`, `cerbos`): https://pewpui.mvp.local:8443/iam
 
 - Directus to manage the pewpui data:
   - admin UI (`directus@example.com`, `directus`): https://pewpui.mvp.local:8443/cms
   - keycloak user (`guest` or `guest@example.com`, `guest`)
   - keycloak admin user (`admin` or `admin@example.com`, `admin`)
-
-- Adminer to query the database:  
-  - admin UI: https://pewpui.mvp.local:8443/adminer
 
 - Mariadb to manage the database
 
@@ -35,6 +37,17 @@ Once launched and configured, the available services are:
 - Kong to manage the reverse proxy between services
 
 - An API to manage (CRUD) a "places" Directus collection.
+
+### Extra services for debug
+
+Extra services for debug can be started by using the `docker-compose.4debug.yml` file:
+
+- Swagger to display the OpenAPI Spec documentation:
+  - "Cerbos" on the https://pewpui.mvp.local:8443/iam endpoint
+  - "Api.Places" on the https://pewpui.mvp.local:8443/api/swagger/v1/swagger.json endpoint  
+
+- Adminer to query the Mariadb database:  
+  - admin UI: https://pewpui.mvp.local:8443/adminer
 
 ## Getting Started
 
@@ -51,6 +64,8 @@ Run:
 ```bash
 docker-compose up -d --build
 ```
+
+__note:__ to benefit the extra services (for debug), create a `docker-compose.override.yml` alias to the `docker-compose.4debug.yml` file
 
 ### Test the Directus connection
 

@@ -42,7 +42,7 @@ services:
     ports:
       - "8000:8000"
       - "8001:8001"
-      - "8443:8443"
+      - "${PUBLIC_PORT}:8443"
       - "8444:8444"
     volumes:
       - ./configuration/kong/kong.docker.yml:/etc/kong/kong.yml:ro
@@ -84,6 +84,8 @@ services:
     networks:
     - back
 
+  # Database (MongoDb)
+  # -----------------------------------------------------------------------------
   mongodb:
     container_name: ${COMPOSE_PROJECT_NAME}_mongodb
     image: mongo:6.0
@@ -125,7 +127,7 @@ services:
     - ./configuration/directus/extensions/migrations:/directus/extensions/migrations
     environment:
       # General
-      PUBLIC_URL: https://${PUBLIC_HOST}:8443/cms
+      PUBLIC_URL: https://${PUBLIC_HOST}:${PUBLIC_PORT}/cms
       LOG_LEVEL: info
       # Default role
       CMS_DIRECTUS_DEFAULT_ROLE_ID: ${CMS_DIRECTUS_DEFAULT_ROLE_ID}
@@ -191,6 +193,7 @@ services:
     volumes:
     - ./configuration/keycloak/healthcheck.sh:/usr/local/bin/healthcheck.sh:ro
     - ./configuration/keycloak/realm:/opt/keycloak/data/import:ro
+    - ./configuration/keycloak/initialize.sh:/opt/keycloak/bin/initialize.sh:ro
     environment:
       # Admin Account
       KEYCLOAK_ADMIN: ${IDP_KEYCLOAK_ADMIN_USERNAME}
@@ -203,8 +206,8 @@ services:
       KC_PROXY: edge
       PROXY_ADDRESS_FORWARDING: 'true'
       # Hostname
-      KC_HOSTNAME_ADMIN_URL: https://${PUBLIC_HOST}:8443/auth
-      KC_HOSTNAME_URL: https://${PUBLIC_HOST}:8443/auth
+      KC_HOSTNAME_ADMIN_URL: https://${PUBLIC_HOST}:${PUBLIC_PORT}/auth
+      KC_HOSTNAME_URL: https://${PUBLIC_HOST}:${PUBLIC_PORT}/auth
       # Database
       KC_DB: mariadb
       KC_DB_URL_HOST: ${DB_MARIADB_INTERNAL_HOST}
@@ -213,10 +216,30 @@ services:
       KC_DB_USERNAME: ${DB_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
     healthcheck:
-      test: ['CMD', 'healthcheck.sh', '${KEYCLOAK_INTERNAL_HOST}', '${KEYCLOAK_INTERNAL_PORT}']
+      test: ['CMD', 'healthcheck.sh', '${IDP_KEYCLOAK_INTERNAL_HOST}', '${IDP_KEYCLOAK_INTERNAL_PORT}']
       interval: 20s
       timeout: 5s
       retries: 10
+    networks:
+      - front
+      - back
+
+  # IAM (Cerbos)
+  # -----------------------------------------------------------------------------
+  cerbos:
+    container_name: ${COMPOSE_PROJECT_NAME}_cerbos
+    image: ghcr.io/cerbos/cerbos:latest
+    depends_on:
+      database:
+        condition: service_healthy
+    command: ["server", "--config=/data/config.yaml"]
+    volumes:
+      - ./configuration/cerbos:/data
+    # healthcheck:
+    #   test: ['CMD', 'cerbos', 'healthcheck', '--config=/data/config.yaml', '--kind=http', '--no-tls']
+    #   interval: 20s
+    #   timeout: 5s
+    #   retries: 10
     networks:
       - front
       - back
