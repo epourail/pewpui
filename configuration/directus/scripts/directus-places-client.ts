@@ -35,10 +35,7 @@ class Main {
 	static logEnvInfo() {
 		console.log(`CMS DIRECTUS PUBLIC URL: ${Main.CMS_URL}`);
 		console.log(`CMS DIRECTUS ADMIN EMAIL: ${Main.ADMIN_EMAIL}`);
-		console.log(`CMS DIRECTUS ADMIN PASSWORD: ${Main.ADMIN_PWD?.substring(0, 2)}...${Main.ADMIN_PWD?.slice(-2)}`);
 		console.log(`CMS DIRECTUS CLIENT EMAIL: ${Main.CLIENT_EMAIL}`);
-		console.log(`CMS DIRECTUS CLIENT PASSWORD: ${Main.CLIENT_PWD?.substring(0, 2)}...${Main.CLIENT_PWD?.slice(-2)}`);
-		console.log(`CMS DIRECTUS CLIENT STATIC TOKEN: ${Main.CLIENT_TOKEN?.substring(0, 2)}...${Main.CLIENT_TOKEN?.slice(-2)}`);
 	}
 
 	/***
