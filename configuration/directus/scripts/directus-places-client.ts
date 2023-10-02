@@ -201,7 +201,7 @@ class Main {
 		try {
 			const createdUser = await Main.createUserIfNotExist(client);
 			if (createdUser) {
-				const role = await Main.createRoleIfNotExist(client, "PLACES CONTRIBUTORS", createdUser.id);
+				const role = await Main.createRoleIfNotExist(client, "PLACES CONTRIBUTOR", createdUser.id);
 				await Main.attachRoleToUser(client, role.id, createdUser.id);
 			}
 
